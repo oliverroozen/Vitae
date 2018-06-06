@@ -1,0 +1,39 @@
+{
+  "name": "mrsp33dy123.vitae-portfolio",
+  "title": "Vitae",
+  "version": "0.0.1",
+  "description": "A school-based online portfolio.",
+  "author": "Ollie Roozen",
+  "main": "",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/MrSp33dy123"
+  },
+  "bugs": {
+    "url": "https://github.com/MrSp33dy123"
+  },
+  "keywords": [
+    "CV",
+    "Portfolio",
+    "Social Media",
+    "School"
+  ],
+  "dependencies": {
+    "express": "^4.16.3",
+    "mysql": "^2.15.0",
+    "pug": "^2.0.3",
+    "response-time": "^2.3.2",
+    "uuid": "^3.2.1",
+    "vary": "^1.1.2",
+    "ws": "^3.3.3"
+  },
+  "scripts": {
+    "start": "node --max-old-space-size=4096 start.js"
+  },
+  "private": true,
+  "analyze": true,
+  "license": "MIT",
+  "devDependencies": {
+    "sass": "^1.5.1"
+  }
+}
