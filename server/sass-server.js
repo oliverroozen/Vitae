@@ -8,6 +8,7 @@ const sassRenderOptions = {
     outFile: '/to/my/output.css'
 };
 
+console.log('Started...');
 fs.watch(dir+"/sass", (eventType, filename) => {
     console.log(`event type is: ${eventType}`);
     if (filename) {console.log(`filename change: ${filename}`)};
@@ -22,5 +23,5 @@ fs.watch(dir+"/sass", (eventType, filename) => {
         }
     });
 });
-//
+
 //sass.render({file: scss_filename}, function(err, result) { /* ... */ });
