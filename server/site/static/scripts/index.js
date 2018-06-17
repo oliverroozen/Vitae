@@ -15,9 +15,6 @@ establishWebsocket();
 // As soon as the DOM is ready to manipulate...
 $(document).ready(()=>{
     console.log('Document ready!');
-	
-	$('#backgroundicon svg').addClass('pulseRedAnim');
-	$('#backgroundicon svg').css({'animation-play-state':'paused'});
     
 //    // Waiting until background image is ready to start slideshow...
 //    if ($(background).prop('complete')) {
@@ -58,13 +55,9 @@ function attemptLogin() {
 	
 	console.log('Attempting login...');
 	
-	$('#backgroundicon svg').on('webkitAnimationEnd',()=>{
-		$('#backgroundicon svg').css({'animation-play-state':'paused'});
-	});
-	
 	if (submittedUsername.length > 0 && submittedPassword.length > 8) {
 		// Potentially viable details
-//		$('#codeInput').css(neutStyle);
+		$('#backgroundicon svg').css({'stroke':'rgb(255,255,255)'});
 		handleWS('signin', {username:submittedUsername,password:submittedPassword}, (session)=>{
 			if (session == false) {
 				$('#codeInput').css(failStyle);
@@ -80,7 +73,9 @@ function attemptLogin() {
 			}
 		});
 	} else {
-		$('#backgroundicon svg').css({'animation-play-state':'running'});
+		$('#backgroundicon svg').addClass('pulseRedAnim');
+//		$('#backgroundicon svg').css({'stroke':'rgb(255,100,120)','stroke-dasharray':'10,5'});
+//		$('#backgroundicon svg').animate({'stroke':'rgb(255,100,120)','stroke-dasharray':'1,20','stroke-dashoffset':180},2000);
 	}
 }
 

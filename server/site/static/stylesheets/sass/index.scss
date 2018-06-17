@@ -188,11 +188,9 @@ a:hover {
 }
 
 @keyframes pulseRedError {
-    from {stroke: rgb(255,255,255);}
-    25% {stroke: $error-colour;}
-	50% {stroke: lighten($error-colour,10%);}
-	75% {stroke: $error-colour;}
-    to {stroke: rgb(255,255,255);}
+    from {stroke: rgb(255,255,255);stroke-dasharray:'0,5';stroke-dashoffset:0}
+	50% {stroke-dasharray:'1,5';stroke: $error-colour;stroke-dashoffset:180}
+    to {stroke: rgb(255,255,255); stroke-dasharray:'0,5';stroke-dashoffset:360}
 }
 
 @keyframes pulseOpacity {
