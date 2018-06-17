@@ -1,0 +1,61 @@
+doctype html
+html(lang='en')
+	head
+		include head
+	body#welcome
+		#disconnectedOverlay
+			.container
+				p STANDBY
+				img.buffering(src="assets/loading-icon-2.png")
+				p OFFLINE
+		#accountManagement
+			a.buttonA(onclick='accountPrompt()') Enter Code
+			.popup
+				.inner
+					.wrapper.code
+						h1 You don't have a code
+				p
+					| To cut down on 
+					i hassle
+					| , we use codes that correspond to your account instead of keeping usernames and passwords.
+				.wrapper
+					h2 Have a code from another device?
+					input#codeInput.inputA(name='usercode', spellcheck='false', autocomplete='off', maxlength='6', placeholder='Enter it here', type='text')
+				br
+				h2.tip
+					| To create an account, simply 
+					a scroll down
+					| ...
+			.background
+				img(src='', alt='Background One')
+				img(src='', alt='Background Two')
+			#bodyWrapper
+				.intro
+					.wrapper
+						.title
+						br
+						.blurb
+							p Revision, Revised.
+						br
+					.next-page
+						| ▼
+				.info
+					.wrapper
+						.text
+							p Say hello to
+							h1 The Iris
+						.revisionDisplay
+							.display
+								canvas#exampleDisplay(width='400', height='400')
+							.list
+								.assessmentsScreen
+								a.buttonA.edit(onclick='editAssessments()') Edit Assessments
+							.text.start
+								a#start Get organized now
+								.wrapper
+									div.circle
+									div.circle
+									div.circle
+// cd C:\Users\Ollie\Google Drive\Coding\Projects\Revision Manager\Oblivion Revision Manager\stylesheets
+// cd H:\Documents\Digital Programming\Revision Manager\Oblivion Revision Manager\stylesheets
+// sass --watch sass\index.scss:style.css

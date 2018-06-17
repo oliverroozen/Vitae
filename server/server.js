@@ -83,7 +83,7 @@ sql.connect((err)=>{
 });
 
 app.get('/', function (req, res) {
-    res.render('index', {randVer: Math.round(Math.random()*1000)});
+    res.render('login', {randVer: Math.round(Math.random()*1000)});
     console.log(`index served to ${req.ip} in ${res.getHeader("X-Response-Time")}ms`);
 });
 
