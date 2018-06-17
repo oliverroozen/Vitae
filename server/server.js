@@ -34,51 +34,72 @@ sql.connect((err)=>{
     if (err) {
         console.log('Error connecting to SQL database: ' + err.stack);
     } else {
-        sql.query('CREATE DATABASE IF NOT EXISTS RevisionManager');
-        sql.changeUser({database : 'RevisionManager'}, function(err) {if (err) throw err;});
-        
-        sql.query(`CREATE TABLE IF NOT EXISTS users (
-            userID CHAR(6) NOT NULL,
-            signupDate DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP(),
-            lastLogin DATETIME NOT NULL,
-            lastIP VARCHAR(255) NOT NULL,
-            PRIMARY KEY (userID)
-        )`, (err)=>{
-            if (err) {console.log(err)};
-        });
-        sql.query(`CREATE TABLE IF NOT EXISTS assessments (
-            assessmentID BIGINT UNSIGNED,
-            userID CHAR(6) NOT NULL,
-            name VARCHAR(64) NOT NULL,
-            subject VARCHAR(64) NOT NULL,
-            format CHAR(4) NOT NULL,
-            type CHAR(4) NOT NULL,
-            start DATE NOT NULL,
-            end DATE NOT NULL,
-            time TIME NOT NULL,
-            PRIMARY KEY (assessmentID),
-            FOREIGN KEY (userID) REFERENCES users(userID)
-        )`, (err)=>{
-            if (err) {console.log(err)};
-        });
-        sql.query(`CREATE TRIGGER setuuid
-            BEFORE INSERT ON assessments
-            FOR EACH ROW
-                IF new.assessmentID IS NULL
-                THEN
-                    SET new.assessmentID = UUID_SHORT();
-            END IF;
-        `, (err)=>{
-            if (err) {
-                if (err.errno != 1359) {console.log(err)} else {console.log('Caught error on create trigger.')};
-            };
-        });
-        
-        console.log('Connected to database...');
-        
-        server.listen(2001,()=>{
-            console.log('Online on port 2001!');
-        });
+        sql.query('CREATE DATABASE IF NOT EXISTS Vitae',(err)=>{
+			sql.changeUser({database : 'Vitae'}, function(err) {if (err) throw err;});
+			sql.query(`CREATE TABLE IF NOT EXISTS schools (
+				schoolID SMALLINT NOT NULL AUTO_INCREMENT,
+				nzqaNum SMALLINT NOT NULL,
+				title VARCHAR(64) NOT NULL,
+				location VARCHAR(255) NOT NULL,
+				PRIMARY KEY (schoolID)
+			)`, (err)=>{
+				if (err) {console.log(err)};
+			});
+			sql.query(`CREATE TABLE IF NOT EXISTS users (
+				userID INT NOT NULL AUTO_INCREMENT,
+				accountType CHAR(4) NOT NULL,
+				schoolID SMALLINT,
+				nzqaNum INT NOT NULL,
+				userCode VARCHAR(255) NOT NULL,
+				name VARCHAR(64) NOT NULL,
+				yearLevel TINYINT NOT NULL,
+				bio VARCHAR(256) NOT NULL,
+				PRIMARY KEY (userID),
+				FOREIGN KEY (schoolID) REFERENCES schools(schoolID)
+			)`, (err)=>{
+				if (err) {console.log(err)};
+			});
+			sql.query(`CREATE TABLE IF NOT EXISTS posts (
+				postID INT NOT NULL AUTO_INCREMENT,
+				postType CHAR(4) NOT NULL,
+				userID INT NOT NULL,
+				postTime DATETIME DEFAULT CURRENT_TIMESTAMP(),
+				privacyLevel TINYINT NOT NULL,
+				youTubeURL VARCHAR(11) NOT NULL,
+				PRIMARY KEY (postID),
+				FOREIGN KEY (userID) REFERENCES users(userID)
+			)`, (err)=>{
+				if (err) {console.log(err)};
+			});
+			sql.query(`CREATE TABLE IF NOT EXISTS comments (
+				commentID INT NOT NULL AUTO_INCREMENT,
+				postID INT NOT NULL,
+				postTime DATETIME DEFAULT CURRENT_TIMESTAMP(),
+				content VARCHAR(256) NOT NULL,
+				PRIMARY KEY (commentID),
+				FOREIGN KEY (postID) REFERENCES posts(postID)
+			)`, (err)=>{
+				if (err) {console.log(err)};
+			});
+//			sql.query(`CREATE TRIGGER setuuid
+//				BEFORE INSERT ON assessments
+//				FOR EACH ROW
+//					IF new.assessmentID IS NULL
+//					THEN
+//						SET new.assessmentID = UUID_SHORT();
+//				END IF;
+//			`, (err)=>{
+//				if (err) {
+//					if (err.errno != 1359) {console.log(err)} else {console.log('Caught error on create trigger.')};
+//				};
+//			});
+
+			console.log('Connected to database...');
+
+			server.listen(2001,()=>{
+				console.log('Online on port 2001!');
+			});
+		});
     }
 });
 
@@ -127,40 +148,6 @@ wss.on('connection', (ws, req) => {
                     }
                 });
                 break;
-            case 'signup':
-                createUser(data.callback,ws,ws._socket.remoteAddress + ws._socket.remotePort);
-                break;
-            case 'update':
-                sql.query('SELECT userID FROM users WHERE userID = ?', [data.user.id], function (error, results, fields) {
-                    if (error) throw error;
-
-                    if (results.length != 1) {
-                        // Invalid account
-                        console.log('Invalid account!');
-                        ws.send(JSON.stringify({callback:data.callback,user:false}));
-                    } else {
-                        // Updating all of user's data
-                        if (typeof data.user.assessments == 'object' && data.user.assessments.length > 0) {
-                            var fieldData = [];
-                            for (var key = 0; key < data.user.assessments.length; key++) {
-                                // Server-side input validation needed!
-                                var assmnt = data.user.assessments[key];
-                                fieldData.push([null,data.user.id,assmnt.name,assmnt.subject,assmnt.format,assmnt.type,assmnt.start,assmnt.end,assmnt.time]);
-                            }
-                            sql.query('DELETE FROM assessments WHERE userID = ?; INSERT INTO assessments (assessmentID,userID,name,subject,format,type,start,end,time) VALUES ?', [data.user.id,fieldData], function (error, results, fields) {
-                                if (error) console.log(error);
-                                alertUsers(data.user.id, ws);
-                            });
-                        } else {
-                            sql.query('DELETE FROM assessments WHERE userID = ?', data.user.id, function (error, results, fields) {
-                                if (error) console.log(error);
-                                alertUsers(data.user.id, ws);
-                            });
-                        }
-                        console.log('Successful insertion.');
-                    }
-                });
-                break;
             default:
                 console.log('Error in data.');
         }
@@ -174,7 +161,7 @@ wss.on('close', (close) => {
 });
 
 wss.on('error', (error) => {
-    console.log('Websocket connection closed.');
+    console.log('Websocket connection closed due to error.');
 //    console.log(JSON.stringify(req));
 //    websocketUsers[data.user.id] = ws;
 });
@@ -195,7 +182,7 @@ const keepalive = setInterval(function ping() {
             });
         }
     }
-}, 3000);
+}, 5000);
 
 function createUser(callback,ws,ip) {
     const newCode = generateCode(6);

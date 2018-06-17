@@ -3,6 +3,24 @@ html(lang='en')
 	head
 		include head
 	body#login
-		img.backgroundicon(src="assets/loading-icon-2.png")
-		div.container
-			| Login
+		//-img.backgroundicon.centered(src="assets/network.svg")
+		div#backgroundicon.centered
+			include ../static/assets/network-2.svg
+		div.container.centered
+			div.box
+				p Welcome to 
+					a(href="https://github.com/MrSp33dy123/Vitae" title="Vitae") Vitae
+					| , an online portfolio.
+					br
+					| We're using administrator-given placeholder details right now.
+				div
+					input#username.inputA(name='username', spellcheck='false', autocomplete='off', maxlength='64', placeholder='username', type='text')
+					input#password.inputA(name='password', spellcheck='false', autocomplete='off', maxlength='256', placeholder='password', type='password')
+					br
+					a.buttonA.login(onclick='attemptLogin()') enter
+		div.footer
+			div
+				| Icon by 
+				a(href="https://www.flaticon.com/authors/smashicons" title="Smashicons") Smashicons
+				|  from 
+				a(href="https://www.flaticon.com/" title="Flaticon") flaticon.com

@@ -1,13 +1,12 @@
-$main-theme: rgba(95,158,160,1);
-$add-colour: rgb(0,0,255);
-$delete-colour: rgb(255,0,0);
-$edit-colour: rgb(255,255,0);
-$submit-colour: rgb(0,255,0);
-$done-colour: rgb(0,255,220);
+$motif-colour: rgb(255,205,80);
+$error-colour: rgb(255,120,120);
 
 @mixin filter($filters) {
     -webkit-filter: $filters;
-    filter: $filters;
+	-moz-filter: $filters;
+	-ms-filter: $filters;
+	-o-filter: $filters;
+	filter: $filters;
 }
 @mixin user-select($state) {
     -webkit-touch-callout: $state; /* iOS Safari */
@@ -17,11 +16,25 @@ $done-colour: rgb(0,255,220);
     -ms-user-select: $state; /* Internet Explorer/Edge */
     user-select: $state; /* Non-prefixed version, currently supported by Chrome and Opera */
 }
+@mixin user-drag($state) {
+	-webkit-user-drag: $state;
+	-khtml-user-drag: $state;
+	-moz-user-drag: $state;
+	-o-user-drag: $state;
+	user-drag: $state;
+}
 
+@mixin user-drag($state) {
+	-webkit-transition: $state;
+	-moz-transition: $state;
+	-ms-transition: $state;
+	-o-transition: $state;
+	transition: $state;
+}
+ 
 @import 'reset';
 @import 'header';
 @import 'body';
-@import 'nav';
 
 @font-face {
 font-family: Code;
@@ -68,6 +81,14 @@ body {
 
 a {
     cursor: pointer;
+	font-style: italic;
+	text-decoration: none;
+	color: inherit;
+	transition: color 150ms linear;
+}
+
+a:hover {
+	color: lighten(desaturate($motif-colour, 2%),10%);
 }
 
 .centered {
@@ -108,7 +129,7 @@ a {
     border:1px solid;
     border-radius: 100vh;
     transition: all 220ms ease-in-out;
-    margin: 15px;
+    margin: 10px;
     padding: 5px 10px 5px 10px;
 }
 .buttonA:hover {
@@ -144,153 +165,34 @@ a {
     color: rgb(10,10,10);
 }
 
-.popup {
-    display:none;
-    color: white;
-    position: fixed;
-    @extend .centered;
-    z-index: 15;
-    background-color: rgba(10,10,10,10.95);
-    padding: 35px;
-    box-shadow: 4px 4px 0px rgba(white, $shadow-darkness);
-    text-align: center;
-    font-family: Futura;
-}
-
-.revisionDisplay {
-    @include user-select(none);
-    img {
-        border-radius: 100%;
-    }
-    > a.edit {
-        display:none;
-        color:rgb(150,80,250);
-        margin-top: 20px;
-    }
-	.list {
-		display:block;
-	}
-    .assessmentsScreen {
-		@extend .popup;
-        table {
-            border-collapse: collapse;
-            font-family: Stellar;
-            margin-left:auto; 
-            margin-right:auto;
-            tr {
-                color: white;
-            }
-            tr.active-false {
-                color: rgb(150,150,150);
-            }
-            tr.heading {
-                border-bottom: 1px solid white;
-            }
-            th {
-                font-size:1.2em;
-                padding:5px;
-            }
-            td {
-                i {
-                    font-size:0.7em;
-                    font-style: normal;
-                }
-                padding:12px;
-                border: none;
-                text-align: center;
-            }
-            input, select {
-                display: none;
-                font-family:Gravity;
-                font-style: normal;
-                text-decoration: none;
-                cursor: pointer;
-                -webkit-touch-callout: none;
-                -webkit-user-select: none; 
-                -khtml-user-select: none;
-                -moz-user-select: none; 
-                -ms-user-select: none; 
-                user-select: none;
-                background: none;
-                border:1px solid;
-                border-radius: 100vh;
-                transition: all 150ms ease-in-out;
-                margin: 15px;
-                padding: 5px 10px 5px 10px;
-                color: white;
-                outline-width: 0;
-                option {
-                    background-color: rgb(5,5,5);
-                }
-            }
-            input:hover, select:hover {
-                color: rgb(200,255,225);
-            }
-            input:focus, select:focus {
-                border-radius: 0px;
-                color: rgb(200,255,225);
-            }
-            a {
-                font-family: FontAwesome;
-                font-size:210%;
-                transition: color 150ms linear;
-                font-weight: 100;
-//                float:left;
-                margin:5px;
-            }
-            a.edit {
-                color: lighten(desaturate($edit-colour, 50%),25%);
-            }
-            a.edit:hover {
-                color: lighten(desaturate($edit-colour, 5%),15%);
-            }
-            a.edit:active {
-                color: $edit-colour;
-            }
-            a.delete {
-                display: none;
-                color: lighten(desaturate($delete-colour, 50%),25%);
-            }
-            a.delete:hover {
-                color: lighten(desaturate($delete-colour, 5%),15%);
-            }
-            a.delete:active {
-                color: $delete-colour;
-            }
-            a.submit {
-                display:none;
-                color: lighten(desaturate($submit-colour, 50%),25%);
-            }
-            a.submit:hover {
-                color: lighten(desaturate($submit-colour, 5%),15%);
-            }
-            a.submit:active {
-                color: $submit-colour;
-            }
-            a.add {
-                color: lighten(desaturate($add-colour, 50%),25%);
-            }
-            a.add:hover {
-                color: lighten(desaturate($add-colour, 5%),15%);
-            }
-            a.add:active {
-                color: rgb(80,255,80);
-            }
-            a.done {
-                color: lighten(desaturate($done-colour, 50%),25%);
-            }
-            a.done:hover {
-                color: lighten(desaturate($done-colour, 5%),15%);
-            }
-            a.done:active {
-                color: rgb(255,50,255);
-            }
-        }
-    }
-}
-
 .circleOpacityPulse {
     animation: pulseOpacity 50ms 1 forwards;
+}
+
+.pulseRedAnim {
+	animation: pulseRedError 1800ms 1 forwards;
+	animation-timing-function: ease-in-out;
+}
+
+.iconExitAnim {
+    animation: iconExit 1.5s 1 forwards;
+	animation-timing-function: ease-in;
+}
+
+
+@keyframes iconExit {
+    from {stroke-width: 1.55;}
+    12% {stroke-width: 1.7;stroke:lighten($motif-colour,10%);}
+	70% {opacity:1;}
+    to {stroke-width: 0; opacity:0.5;}
+}
+
+@keyframes pulseRedError {
+    from {stroke: rgb(255,255,255);}
+    25% {stroke: $error-colour;}
+	50% {stroke: lighten($error-colour,10%);}
+	75% {stroke: $error-colour;}
+    to {stroke: rgb(255,255,255);}
 }
 
 @keyframes pulseOpacity {

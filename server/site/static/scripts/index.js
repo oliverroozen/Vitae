@@ -15,6 +15,9 @@ establishWebsocket();
 // As soon as the DOM is ready to manipulate...
 $(document).ready(()=>{
     console.log('Document ready!');
+	
+	$('#backgroundicon svg').addClass('pulseRedAnim');
+	$('#backgroundicon svg').css({'animation-play-state':'paused'});
     
 //    // Waiting until background image is ready to start slideshow...
 //    if ($(background).prop('complete')) {
@@ -47,6 +50,46 @@ $(document).ready(()=>{
 //        ]);
 //    }
 });
+
+function attemptLogin() {
+	// Submit code
+	var submittedUsername = $('#username').val();
+	var submittedPassword = $('#password').val();
+	
+	console.log('Attempting login...');
+	
+	$('#backgroundicon svg').on('webkitAnimationEnd',()=>{
+		$('#backgroundicon svg').css({'animation-play-state':'paused'});
+	});
+	
+	if (submittedUsername.length > 0 && submittedPassword.length > 8) {
+		// Potentially viable details
+//		$('#codeInput').css(neutStyle);
+		handleWS('signin', {username:submittedUsername,password:submittedPassword}, (session)=>{
+			if (session == false) {
+				$('#codeInput').css(failStyle);
+			} else {
+				revisionDisplay.update(revisionDisplay.calcImportance(user.assessments));
+
+				$('#codeInput').css(succStyle);
+				$('body#welcome .background img').css({filter:''});
+				setTimeout(()=>{
+					$('#accountManagement div.popup').fadeOut(300);
+				},500)
+				loadMain();
+			}
+		});
+	} else {
+		$('#backgroundicon svg').css({'animation-play-state':'running'});
+	}
+}
+
+function successfulLogin() {
+	$("div#backgroundicon svg").addClass('iconExitAnim');
+	
+	return('Logged in.');
+}
+
     
 // Function that automatically positions the background based on the dimensions of the image and the viewport
 function sizeBG() {

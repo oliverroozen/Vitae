@@ -1,232 +1,59 @@
-$blur-amount: 5px;
-$shadow-darkness: 0.5;
-body#welcome {
-    #bodyWrapper {
-        @extend .snapScroll;
-        position: absolute;
-    }
-    .background {
-        position:absolute;
-        overflow:hidden;
-        width:100vw;
-        height:100vh;
-        z-index:-100;
-        background-color: rgb(15,15,15);
-        img {
-            display: initial;
-            box-sizing:border-box;
-            @extend .centered;
-            @include filter(blur($blur-amount) brightness(60%) saturate(150%));
-            display: none;
-            transition: filter 300ms 200ms linear;
-            good:meme;
-        }
-    }
-    .intro {
-        position: relative;
-        height:100vh;
-        width:100vw;
-        .wrapper {
-            @extend .centered;
-            width:90vw;
-            text-align: center;
-            .title {
-                font-family: Futura;
-                font-size: 6em;
-                font-weight: bold;
-                text-shadow: 4px 4px 0px rgba(white, $shadow-darkness);
-                -webkit-font-smoothing: antialiased;
-            }
-            .text {
-                font-family: Gravity;
-            }
-            .blurb {
-                font-style: italic;
-                font-family: Stellar;
-                font-size: 1.2em;
-            }
-        }
-        .next-page {
-            font-size: 130%;
-            color: rgba(255,255,255,0.3);
-            position: absolute;
-            left: 50%;
-            transform: translate(-50%,-100%);
-            padding-bottom: 8px;
-            top: 100%;
-            animation: pulseOpacity 1800ms infinite;
-        }
-    }
-    .info {
-        position:absolute;
-        top:100vh;
-        height:100vh;
-        width:100vw;
-        transition: background-color 300ms ease-out;
-        .wrapper {
-            @extend .centered;
-            width:90vw;
-            text-align: center;
-            font-family: Futura;
-            .text {
-                display: block;
-            }
-            .start {
-                $baseline-diameter: 150px;
-                $diameter-multiplier: 1.3;
-                position:relative;
-                margin-top:20px;
-                animation: rainbowColor 8000ms infinite;
-//                animation: pulseSize 1000ms infinite;
-                .wrapper {
-                    @extend .centered;
-                    overflow-y: hidden;
-                    z-index:-2;
-                    height: 220%;
-                    div.circle {
-                        border: 2px rgb(100,100,100) solid;
-                        border-radius: 50%;
-                        @extend .centered;
-                        z-index: -5;
-    //                    display: none; // Temp
-                    }
-                    div.circle:nth-of-type(1) {
-                        width: $baseline-diameter;
-                        height: $baseline-diameter;
-                    }
-                    div.circle:nth-of-type(2) {
-                        width: $baseline-diameter * $diameter-multiplier;
-                        height: $baseline-diameter * $diameter-multiplier;
-                    }
-                    div.circle:nth-of-type(3) {
-                        width: $baseline-diameter * $diameter-multiplier * $diameter-multiplier;
-                        height: $baseline-diameter * $diameter-multiplier * $diameter-multiplier;
-                    }
-                }
-            }
-        }
-    }
-    #accountManagement {
-        > a {
-            top:0px;
-            right:0px;
-            position: fixed;
-            color: rgb(100,100,100);
-            border-color: rgb(100,100,100);
-            border-width: 1px;
-            z-index: 5;
-        }
-        .popup {
-            p {
-                margin-bottom: 25px;
-            }
-            .code {
-                background-color: white;
-                padding: 5px;
-                width: 100%;
-                margin-bottom: 10px;
-                box-sizing: border-box;
-                h1 {
-                    color: black;
-                    font-family: FrontPageSupplement;
-                    font-weight: 100;
-                    font-size: 3.5em;
-                }
-            }
-            h2 {
-                font-style: italic;
-                font-family: Stellar;
-                font-size: 1.2em;
-                font-weight: normal;
-                line-height: 150%;
-                display: inline-block;
-            }
-            input {
-                width: 80px;
-            }
-            a {
-                font-style: italic;
-                font-family: Stellar;
-                color: rgb(255,220,255);
-//                transition: all 250ms linear;
-            }
-            a:hover {
-                border-bottom: dashed 1px rgb(180,180,180);
-            }
-            
-        }
-    }
-    #disconnectedOverlay {
-        display:none;
-        position: fixed;
-        top: 0px;
-        bottom: 0px;
-        left: 0px;
-        right: 0px;
-        background-color: RGBA(0,0,0,0.8);
-        z-index: 30;
-        .container {
-            @extend .centered;
-            color: RGB(205,20,20);
-            font-family:"Courier New", Courier, monospace;
-            float: left;
-            p {
-                font-size: 20px;
-                line-height:108px;
-                vertical-align:middle;
-            }
-            p:nth-of-type(1) {
-                float:left;
-            }
-            p:nth-of-type(2) {
-                float:right;
-            }
-            .buffering {
-                width:60px;
-                animation: loadingSpin 900ms infinite step-end;
-                padding:24px;
-            }
-        }
-    }
-}
-
-@media (min-aspect-ratio:1/1) {
-	.revisionDisplay {
-		.list {
-			float: right;
-			a.edit {
-				display: none !important;
+body {
+	width: 100vw;
+	height: 100vh;
+	background-color: rgb(25,25,25);
+	float:left;
+	display:inline-block;
+	div.container {
+		text-align: center;
+		width: 90vw;
+		div.box {
+			text-align: center;
+			font-family: 'Gravity';
+			font-size: 0.9em;
+			div {
+				text-align: center;
 			}
-			table {
+			p {
+				color: white;
+				margin-bottom: 6px;
+			}
+			input {
+				margin: 6px;
+				width:20vw;
+				backdrop-filter: blur(5px);
+			}
+			input#username {
+				float:left;
+			}
+			input#password {
+				float: left;
+				clear: both;
+			}
+			a.login {
 				display: inline-block;
+				color: rgb(150,160,160);
+				backdrop-filter: blur(5px);
 			}
-			.assessmentsScreen {
-				display: inline-block !important;
-				position: relative;
-				transform: none;
-				top:0px;
-				left:0px;
-				background: none;
-				box-shadow: none;
-			}
-//			.assessmentsScreen {
-//				display:none;
-//				color: white;
-//				position: fixed;
-//				top:50%;
-//				left:50%;
-//				transform:translate(-50%,-50%);
-//				z-index: 15;
-//				background-color: rgba(10,10,10,10.95);
-//				padding: 35px;
-//				box-shadow: 4px 4px 0px rgba(white, $shadow-darkness);
-//				text-align: center;
-//				font-family: Futura;
-//			}
-		}
+		}	
+	}
+	div#backgroundicon {
+		opacity: 0.15;
+		width: 50vw;
+		@include user-select(none);
+		@include user-drag(none);
+	}
+	div.footer {
+		color: rgb(120,120,120);
+		font-family: 'Gravity';
+		font-size: 0.8em;
+		padding: 10px;
+		bottom:0px;
+		width: 100vw;
+		position: absolute;
+		text-align: center;
 	}
 }
-
-body#welcome::-webkit-scrollbar { 
-    display: none; 
+body#login::-webkit-scrollbar { 
+    display: none;
 }
