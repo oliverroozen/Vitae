@@ -73,9 +73,23 @@ function attemptLogin() {
 			}
 		});
 	} else {
-		$('#backgroundicon svg').addClass('pulseRedAnim');
-//		$('#backgroundicon svg').css({'stroke':'rgb(255,100,120)','stroke-dasharray':'10,5'});
-//		$('#backgroundicon svg').animate({'stroke':'rgb(255,100,120)','stroke-dasharray':'1,20','stroke-dashoffset':180},2000);
+////		$('#backgroundicon svg').addClass('pulseRedAnim');
+//		$('#backgroundicon svg').css({'stroke':'rgb(255,100,120)','stroke-dasharray':'5,5','stroke-dashoffset':0});
+//		$('#backgroundicon svg').animate({'stroke-dasharray':'2,5',/*'stroke-dashoffset':180*/},2500);
+        
+        var networkImage = Snap('#backgroundicon svg').select('*');
+        Snap.animate([255,0,0],[80,3,180], function(values) {
+            console.log(values);
+            
+            networkImage.attr({'stroke':`rgb(255,${values[0]},${values[0]})`,'stroke-dasharray': `10,${values[1]}`,'stroke-dashoffset':values[2]});
+        }, 2000, ()=>{
+            Snap.animate([80,3,180],[255,0,300], function(values) {
+                console.log(values);
+
+                networkImage.attr({'stroke':`rgb(255,${values[0]},${values[0]})`,'stroke-dasharray': `10,${values[1]}`,'stroke-dashoffset':values[2]});
+            },2000);
+        });
+        
 	}
 }
 
@@ -259,8 +273,8 @@ Number.prototype.pad = function(n) {
 }
 
 window.onbeforeunload = function() {
-    websocket.onclose = function () {}; // disable onclose handler first
-    websocket.close();
+    notificationSocket.onclose = function () {}; // disable onclose handler first
+    notificationSocket.close();
 };
 
 /*

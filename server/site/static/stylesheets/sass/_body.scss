@@ -42,6 +42,9 @@ body {
 		width: 50vw;
 		@include user-select(none);
 		@include user-drag(none);
+        svg {
+            transition: stroke 800ms;
+        }
 	}
 	div.footer {
 		color: rgb(120,120,120);
