@@ -4,7 +4,7 @@
 const callDate = new Date();
 const host = "ws://" + window.location.host;
 
-var notificationSocket;
+var serverSocket;
 var connectionRetry;
 var currentlyEditing = false;
 var WScallbacks = [];
@@ -57,39 +57,31 @@ function attemptLogin() {
 	
 	if (submittedUsername.length > 0 && submittedPassword.length > 8) {
 		// Potentially viable details
-		$('#backgroundicon svg').css({'stroke':'rgb(255,255,255)'});
-		handleWS('signin', {username:submittedUsername,password:submittedPassword}, (session)=>{
-			if (session == false) {
-				$('#codeInput').css(failStyle);
-			} else {
-				revisionDisplay.update(revisionDisplay.calcImportance(user.assessments));
-
-				$('#codeInput').css(succStyle);
-				$('body#welcome .background img').css({filter:''});
-				setTimeout(()=>{
-					$('#accountManagement div.popup').fadeOut(300);
-				},500)
-				loadMain();
-			}
-		});
-	} else {
-////		$('#backgroundicon svg').addClass('pulseRedAnim');
-//		$('#backgroundicon svg').css({'stroke':'rgb(255,100,120)','stroke-dasharray':'5,5','stroke-dashoffset':0});
-//		$('#backgroundicon svg').animate({'stroke-dasharray':'2,5',/*'stroke-dashoffset':180*/},2500);
-        
-        var networkImage = Snap('#backgroundicon svg').select('*');
-        Snap.animate([255,0,0],[80,3,180], function(values) {
-            console.log(values);
+        $.ajax({
+            url: window.location.host + "/validate",
+            data: {username:submittedUsername,password:submittedPassword},
+            dataType: 'json',
+            method: 'POST'
+        }).done((data)=>{
             
-            networkImage.attr({'stroke':`rgb(255,${values[0]},${values[0]})`,'stroke-dasharray': `10,${values[1]}`,'stroke-dashoffset':values[2]});
-        }, 2000, ()=>{
-            Snap.animate([80,3,180],[255,0,300], function(values) {
-                console.log(values);
-
-                networkImage.attr({'stroke':`rgb(255,${values[0]},${values[0]})`,'stroke-dasharray': `10,${values[1]}`,'stroke-dashoffset':values[2]});
-            },2000);
         });
         
+//		handleWS('signin', {username:submittedUsername,password:submittedPassword}, (session)=>{
+//			if (session == false) {
+//				$('#codeInput').css(failStyle);
+//			} else {
+//				revisionDisplay.update(revisionDisplay.calcImportance(user.assessments));
+//
+//				$('#codeInput').css(succStyle);
+//				$('body#welcome .background img').css({filter:''});
+//				setTimeout(()=>{
+//					$('#accountManagement div.popup').fadeOut(300);
+//				},500)
+//				loadMain();
+//			}
+//		});
+	} else {
+        networkImageAnimation();
 	}
 }
 
@@ -99,6 +91,16 @@ function successfulLogin() {
 	return('Logged in.');
 }
 
+function networkImageAnimation(color) {
+    var networkImage = Snap('#backgroundicon svg').select('*');
+    Snap.animate([255,0,0],[80,10,30], function(values) {
+        networkImage.attr({'stroke':`rgb(255,${values[0]},${values[0]})`,'stroke-dasharray': `20,${values[1]}`,'stroke-dashoffset':values[2]});
+    }, 1000, mina.easein(), ()=>{
+        Snap.animate([80,10,30],[255,0,45], function(values) {
+            networkImage.attr({'stroke':`rgb(255,${values[0]},${values[0]})`,'stroke-dasharray': `20,${values[1]}`,'stroke-dashoffset':values[2]});
+        },1000,mina.easeout());
+    });
+}
     
 // Function that automatically positions the background based on the dimensions of the image and the viewport
 function sizeBG() {
@@ -131,27 +133,15 @@ var parralax = _.throttle((event) => { // event.pageX, event.pageY
     });
 },1000/30);
 
-// Generates a code of X length using uppercase chars, lowercase chars, and numbers
-function generateCode(length) {
-    var text = "";
-    var possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-
-    for(var i=0; i < length; i++) {
-        text += possible.charAt(Math.floor(Math.random() * possible.length));
-    }
-    
-    return text;
-}
-
 // Websocket code
 function establishWebsocket() {
-    notificationSocket = new WebSocket(host);
+    serverSocket = new WebSocket(host);
     
-    notificationSocket.addEventListener('open', (event)=>{
+    serverSocket.addEventListener('open', (event)=>{
         console.log('Websocket connection online.');
         $('#disconnectedOverlay').fadeOut(600);
     });
-    notificationSocket.addEventListener('close', (event)=>{
+    serverSocket.addEventListener('close', (event)=>{
         console.log('Socket closed.');
         
         connectionRetry = setTimeout(()=>{
@@ -160,10 +150,10 @@ function establishWebsocket() {
         
         $('#disconnectedOverlay').fadeIn(600);
     });
-    notificationSocket.addEventListener('error', (event)=>{
+    serverSocket.addEventListener('error', (event)=>{
         console.error('Error connecting to websocket server!');
     });
-    notificationSocket.addEventListener('message', (event)=>{
+    serverSocket.addEventListener('message', (event)=>{
         var data = JSON.parse(event.data);
 
         console.log(data);
@@ -182,9 +172,9 @@ function establishWebsocket() {
     });
 }
 
-function handleWS(mode, user, callback) {
+function handleWS(mode, data, callback) {
     var lastIndex = WScallbacks.push(callback) - 1;
-    notificationSocket.send(JSON.stringify({process:mode,callback:lastIndex,user:user}));
+    serverSocket.send(JSON.stringify({process:mode,callback:lastIndex,user:data}));
 }
 
 // Function from StackOverflow that resolves length of an object
@@ -273,8 +263,8 @@ Number.prototype.pad = function(n) {
 }
 
 window.onbeforeunload = function() {
-    notificationSocket.onclose = function () {}; // disable onclose handler first
-    notificationSocket.close();
+    serverSocket.onclose = function () {}; // disable onclose handler first
+    serverSocket.close();
 };
 
 /*

@@ -6,10 +6,27 @@ const responseTime = require('response-time');
 const mysql = require('mysql');
 const WebSocket = require('ws');
 const http = require('http');
+const uuidv4 = require('uuid/v4');
+const session = require('express-session');
 
 const app = express();
 const server = http.createServer();
-const wss = new WebSocket.Server({server:server});
+
+const sessionParser = session({
+  saveUninitialized: false,
+  secret: '$eCuRiTy',
+  resave: false
+});
+
+const wss = new WebSocket.Server({
+  verifyClient: (info, done) => {
+    console.log('Parsing session from request...');
+    sessionParser(info.req, {}, () => {
+      console.log('Session is parsed!');
+      // We can reject the connection by returning false to done(). For example, reject here if user is unknown.
+      done(info.req.session.userId);
+    });
+  },server});
 
 var sql = mysql.createConnection({
     host: 'localhost',
@@ -19,7 +36,7 @@ var sql = mysql.createConnection({
     multipleStatements: true
 });
 
-var websocketUsers = {};
+var websocketUsers = {}; // Depreciated
 
 server.on('request', app);
 
@@ -29,6 +46,7 @@ app.set('view engine', 'pug');
 
 app.use(express.static('site/static'));
 app.use(responseTime({digits:0, suffix:false}));
+app.use(sessionParser);
 
 sql.connect((err)=>{
     if (err) {
@@ -108,22 +126,33 @@ app.get('/', function (req, res) {
     console.log(`index served to ${req.ip} in ${res.getHeader("X-Response-Time")}ms`);
 });
 
+app.post('/validate', function (req, res) {
+    sql.query('SELECT userID FROM users WHERE userID = ?', [id], function (error, results, fields) {
+        if (error) throw error;
+
+        if (results.length == 0) {
+            // Send response to let client know server handled successfully, but with no returns
+            console.log('No account found.')
+            ws.send(JSON.stringify({callback:data.callback,user:false}));
+        }
+    });
+});
+
 wss.on('connection', (ws, req) => {
     console.log('Websocket connection made!');
     
-    ws.isAlive = true;
-    ws.on('pong', heartbeat);
+    req.session.userId = uuidv4(); // New session code.
+    
+//    ws.isAlive = true;
+//    ws.on('pong', heartbeat);
     
     ws.on('message', (message) => {
         console.log(`WS message: ${message}`);
         var data = JSON.parse(message);
         
-//        console.log(JSON.stringify(websocketUsers));
-        
         switch (data.process) {
             case 'signin':
-                const id = data.user.id;
-                console.log("Submitted ID: " + id);
+                console.log("Submitted info: " + data.user);
 
                 sql.query('SELECT userID FROM users WHERE userID = ?', [id], function (error, results, fields) {
                     if (error) throw error;
@@ -166,23 +195,23 @@ wss.on('error', (error) => {
 //    websocketUsers[data.user.id] = ws;
 });
 
-const keepalive = setInterval(function ping() {
-    for (var key in websocketUsers) {
-        if (websocketUsers.hasOwnProperty(key)) {
-            websocketUsers[key].forEach((ws,idx)=>{
-                if (ws.isAlive === false) {
-                    websocketUsers[key].splice(idx, 1);
-                    console.log('Terminating WS for user ' + key);
-                    console.log(websocketUsers[key].length + ' websockets connected');
-                    return;
-//                    return ws.terminate();
-                }
-                ws.isAlive = false;
-                ws.ping('', false, true);
-            });
-        }
-    }
-}, 5000);
+//const keepalive = setInterval(function ping() {
+//    for (var key in websocketUsers) {
+//        if (websocketUsers.hasOwnProperty(key)) {
+//            websocketUsers[key].forEach((ws,idx)=>{
+//                if (ws.isAlive === false) {
+//                    websocketUsers[key].splice(idx, 1);
+//                    console.log('Terminating WS for user ' + key);
+//                    console.log(websocketUsers[key].length + ' websockets connected');
+//                    return;
+////                    return ws.terminate();
+//                }
+//                ws.isAlive = false;
+//                ws.ping('', false, true);
+//            });
+//        }
+//    }
+//}, 5000);
 
 function createUser(callback,ws,ip) {
     const newCode = generateCode(6);
@@ -203,17 +232,6 @@ function createUser(callback,ws,ip) {
     });
 }
 
-function generateCode(length) {
-    var text = "";
-    var possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-
-    for(var i=0; i < length; i++) {
-        text += possible.charAt(Math.floor(Math.random() * possible.length));
-    }
-    
-    return text;
-}
-
 function alertUsers(id, sender) {
     sql.query('SELECT name, subject, format, type, start, end, time FROM assessments WHERE userID = ?', [id], function (error, results, fields) {
         if (error) throw error;
@@ -231,38 +249,7 @@ function heartbeat() {
     this.isAlive = true;
 }
 
-function recordWS(id, ws) {
-    websocketUsers[id] = websocketUsers[id] || [];
-    websocketUsers[id].push(ws);
-    console.log('Adding new websocket, now at ' + websocketUsers[id].length);
-}
-
-
 /*
 ALTER USER 'root'@'localhost'
 IDENTIFIED BY 'admin' PASSWORD EXPIRE NEVER;
 */
-
-// SELECT CASE WHEN EXISTS (SELECT NULL FROM users WHERE userID = ?) THEN 1 ELSE 0 END
-
-//sql.query('SELECT ?? FROM ?? WHERE id = ?', [], function (error, results, fields) {
-//    if (error) throw error;
-//
-//});
-
-//var userData = {
-//    code: "",
-//    assessments: {
-//        "":{
-//            name: "",
-//            subject: "",
-//            format: "",
-//            type: "",
-//            start: "yyyy-mm-dd",
-//            end: "yyyy-mm-dd",
-//            time: "hh:mm"
-//        }
-//    }
-//};
-
-//ON DULPLICATE KEY UPDATE assessments VALUES ()
