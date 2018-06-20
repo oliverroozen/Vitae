@@ -15,6 +15,13 @@ var userData = {};
 // As soon as the DOM is ready to manipulate...
 $(document).ready(()=>{
     console.log('Document ready!');
+	
+	// If enter button is hit on assessments screen
+    $('body#login .container input').on('keyup',(event)=>{
+        if (event.keyCode == 13) {
+            attemptLogin();
+        }
+    });
     
 //    // Waiting until background image is ready to start slideshow...
 //    if ($(background).prop('complete')) {
@@ -67,6 +74,11 @@ function attemptLogin() {
             timeout: 5000,
         }).done((data)=>{
             console.log(data);
+			if (data.result == 'OK') {
+				successfulLogin();
+			} else {
+				networkImageAnimation();
+			}
         });
         
 //		handleWS('signin', {username:submittedUsername,password:submittedPassword}, (session)=>{
@@ -90,6 +102,10 @@ function attemptLogin() {
 
 function successfulLogin() {
 	$("div#backgroundicon svg").addClass('iconExitAnim');
+	$(".container .box").css({opacity:0});
+	setTimeout(()=>{
+		
+	},1500);
 	
 	return('Logged in.');
 }

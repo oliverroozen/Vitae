@@ -1,0 +1,24 @@
+doctype html
+html(lang='en')
+	head
+		include head
+	body#timeline
+		div#backgroundicon.centered
+		div#header
+			div.left
+				a.buttonA.login(onclick='') Vitae
+			div.middle
+				input#search.inputA(name='search', spellcheck='true', autocomplete='on', maxlength='256', placeholder='search Vitae', type='text')
+			div.right
+				a.imageButton.notifications(onclick='')
+					include ../static/assets/notification.svg
+				a.imageButton.account(onclick='')
+					img(src='')
+		div#content
+			div.main
+		div#footer
+			div
+				| Icon by 
+				a(href="https://www.flaticon.com/authors/smashicons" title="Smashicons") Smashicons
+				|  from 
+				a(href="https://www.flaticon.com/" title="Flaticon") flaticon.com

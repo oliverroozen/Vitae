@@ -67,7 +67,7 @@ sql.connect((err)=>{
 			});
 			sql.query(`CREATE TABLE IF NOT EXISTS users (
 				userID INT NOT NULL AUTO_INCREMENT,
-                username VARCHAR(255) NOT NULL,
+                username VARCHAR(255) NOT NULL UNIQUE,
                 password VARCHAR(255) NOT NULL,
                 sessionID VARCHAR(36),
                 sessionCreation DATETIME,
@@ -86,9 +86,10 @@ sql.connect((err)=>{
 				postID INT NOT NULL AUTO_INCREMENT,
 				postType CHAR(4) NOT NULL,
 				userID INT NOT NULL,
-				postTime DATETIME DEFAULT CURRENT_TIMESTAMP(),
+				postTime DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP(),
 				privacyLevel TINYINT NOT NULL,
-				youTubeURL VARCHAR(11) NOT NULL,
+				description VARCHAR(255),
+				youTubeURL VARCHAR(11),
 				PRIMARY KEY (postID),
 				FOREIGN KEY (userID) REFERENCES users(userID)
 			)`, (err)=>{
@@ -121,13 +122,26 @@ sql.connect((err)=>{
 
 			server.listen(2001,()=>{
 				console.log('Online on port 2001!');
+//				insertTestUserData();
+//				insertTestPostData();
 			});
 		});
     }
 });
 
 app.get('/', function (req, res) {
-    res.render('login', {randVer: Math.round(Math.random()*1000)});
+	console.log(req.session.userID);
+	
+	sql.query('SELECT userID FROM users WHERE sessionID = ? AND sessionCreation < (NOW()-1)', [req.session.userID],(error,results,fields)=>{
+		if (error) throw error;
+		
+		if (results.length == 0) {
+			res.render('login', {randVer: Math.round(Math.random()*1000)});
+		} else {
+			res.render('index', {randVer: Math.round(Math.random()*1000)});
+		}
+	});
+	
     console.log(`index served to ${req.ip} in ${res.getHeader("X-Response-Time")}ms`);
 });
 
@@ -146,7 +160,7 @@ app.post('/validate', function (req, res) {
             sql.query('UPDATE users SET sessionID = ?, sessionCreation = CURRENT_TIMESTAMP()', [newSessionID],(error,results,fields)=>{
                 if (error) throw error;
             });
-            req.session.userId = newSessionID;
+            req.session.userID = newSessionID;
             res.json({result:'OK',message:'Session updated.'});
         }
     });
@@ -263,54 +277,45 @@ function heartbeat() {
     this.isAlive = true;
 }
 
-`CREATE TABLE IF NOT EXISTS users (
-				userID INT NOT NULL AUTO_INCREMENT,
-                username VARCHAR(255) NOT NULL,
-                password VARCHAR(255) NOT NULL,
-                sessionID VARCHAR(36),
-                sessionCreation DATETIME,
-				accountType CHAR(4) NOT NULL,
-				schoolID SMALLINT NOT NULL,
-				nzqaNum INT NOT NULL,
-				fullName VARCHAR(64) NOT NULL,
-				yearLevel TINYINT NOT NULL,
-				bio VARCHAR(256) NOT NULL,
-				PRIMARY KEY (userID),
-				FOREIGN KEY (schoolID) REFERENCES schools(schoolID)
-			)`
-
-`CREATE TABLE IF NOT EXISTS schools (
-				schoolID SMALLINT NOT NULL AUTO_INCREMENT,
-				nzqaNum SMALLINT NOT NULL,
-				title VARCHAR(64) NOT NULL,
-				location VARCHAR(255) NOT NULL,
-				PRIMARY KEY (schoolID)
-			)`
-
 function insertTestUserData() {
     var user = {
         username: 'roozeno',
         password: 'admin1234',
         accountType: 'stdt',
-        schoolID: 347,
-        nzqaNum: 0126555266,
+        schoolID: 1,
+        nzqaNum: 126555266,
         fullName: 'Ollie Roozen',
         yearLevel: 13,
-        bio: 'I am the creator.'
+        bio: 'Hello, world.'
     };
+	
     var school = {
         nzqaNum: 347,
         title: 'Lincoln High School',
         location: 'Lincoln, Christchurch'
-    }
-    sql.query('INSERT INTO schools VALUES (?,?,?)', [school.nzqaNum,school.title,school.location],(error,results,fields)=>{
+    };
+	
+    sql.query('INSERT INTO schools (nzqaNum,title,location) VALUES (?,?,?)', [school.nzqaNum,school.title,school.location],(error,results,fields)=>{
         if (error) {throw error};
-        
-        sql.query('INSERT INTO users VALUES (?,?,?,?,?,?,?,?)', [],(error,results,fields)=>{
+        sql.query('INSERT INTO users (username,password,accountType,schoolID,nzqaNum,fullName,yearLevel,bio) VALUES (?,?,?,?,?,?,?,?)', [user.username,user.password,user.accountType,user.schoolID,user.nzqaNum,user.fullName,user.yearLevel,user.bio],(error,results,fields)=>{
         if (error) {throw error};
-        
+        	console.log('Inserted test user data into the database.');
         });
     });
+}
+
+function insertTestPostData() {
+	var post = {
+		postType: 'imge',
+		userID: 1,
+		privacyLevel: 0,
+		description: "Look at dis cool image!"
+	}
+	
+	sql.query('INSERT INTO posts (postType,userID,privacyLevel,description) VALUES (?,?,?,?)', [post.postType,post.userID,post.privacyLevel,post.description],(error,results,fields)=>{
+		if (error) {throw error};
+		console.log('Inserted test post data into the database.');
+	});
 }
 
 /*
