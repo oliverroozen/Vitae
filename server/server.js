@@ -8,6 +8,7 @@ const WebSocket = require('ws');
 const http = require('http');
 const uuidv4 = require('uuid/v4');
 const session = require('express-session');
+const bodyParser = require('body-parser');
 
 const app = express();
 const server = http.createServer();
@@ -46,6 +47,7 @@ app.set('view engine', 'pug');
 
 app.use(express.static('site/static'));
 app.use(responseTime({digits:0, suffix:false}));
+app.use(bodyParser.json());
 app.use(sessionParser);
 
 sql.connect((err)=>{
@@ -65,11 +67,14 @@ sql.connect((err)=>{
 			});
 			sql.query(`CREATE TABLE IF NOT EXISTS users (
 				userID INT NOT NULL AUTO_INCREMENT,
+                username VARCHAR(255) NOT NULL,
+                password VARCHAR(255) NOT NULL,
+                sessionID VARCHAR(36),
+                sessionCreation DATETIME,
 				accountType CHAR(4) NOT NULL,
-				schoolID SMALLINT,
+				schoolID SMALLINT NOT NULL,
 				nzqaNum INT NOT NULL,
-				userCode VARCHAR(255) NOT NULL,
-				name VARCHAR(64) NOT NULL,
+				fullName VARCHAR(64) NOT NULL,
 				yearLevel TINYINT NOT NULL,
 				bio VARCHAR(256) NOT NULL,
 				PRIMARY KEY (userID),
@@ -127,13 +132,22 @@ app.get('/', function (req, res) {
 });
 
 app.post('/validate', function (req, res) {
-    sql.query('SELECT userID FROM users WHERE userID = ?', [id], function (error, results, fields) {
+    console.log(req.body);
+    
+    sql.query('SELECT userID FROM users WHERE username = ? AND password = ?', [req.body.username,req.body.password],(error,results,fields)=>{
         if (error) throw error;
 
         if (results.length == 0) {
             // Send response to let client know server handled successfully, but with no returns
-            console.log('No account found.')
-            ws.send(JSON.stringify({callback:data.callback,user:false}));
+            console.log('Details are invalid.');
+            res.json({result:'FAIL',message:'Details are invalid.'});
+        } else {
+            var newSessionID = uuidv4();
+            sql.query('UPDATE users SET sessionID = ?, sessionCreation = CURRENT_TIMESTAMP()', [newSessionID],(error,results,fields)=>{
+                if (error) throw error;
+            });
+            req.session.userId = newSessionID;
+            res.json({result:'OK',message:'Session updated.'});
         }
     });
 });
@@ -247,6 +261,56 @@ function alertUsers(id, sender) {
 
 function heartbeat() {
     this.isAlive = true;
+}
+
+`CREATE TABLE IF NOT EXISTS users (
+				userID INT NOT NULL AUTO_INCREMENT,
+                username VARCHAR(255) NOT NULL,
+                password VARCHAR(255) NOT NULL,
+                sessionID VARCHAR(36),
+                sessionCreation DATETIME,
+				accountType CHAR(4) NOT NULL,
+				schoolID SMALLINT NOT NULL,
+				nzqaNum INT NOT NULL,
+				fullName VARCHAR(64) NOT NULL,
+				yearLevel TINYINT NOT NULL,
+				bio VARCHAR(256) NOT NULL,
+				PRIMARY KEY (userID),
+				FOREIGN KEY (schoolID) REFERENCES schools(schoolID)
+			)`
+
+`CREATE TABLE IF NOT EXISTS schools (
+				schoolID SMALLINT NOT NULL AUTO_INCREMENT,
+				nzqaNum SMALLINT NOT NULL,
+				title VARCHAR(64) NOT NULL,
+				location VARCHAR(255) NOT NULL,
+				PRIMARY KEY (schoolID)
+			)`
+
+function insertTestUserData() {
+    var user = {
+        username: 'roozeno',
+        password: 'admin1234',
+        accountType: 'stdt',
+        schoolID: 347,
+        nzqaNum: 0126555266,
+        fullName: 'Ollie Roozen',
+        yearLevel: 13,
+        bio: 'I am the creator.'
+    };
+    var school = {
+        nzqaNum: 347,
+        title: 'Lincoln High School',
+        location: 'Lincoln, Christchurch'
+    }
+    sql.query('INSERT INTO schools VALUES (?,?,?)', [school.nzqaNum,school.title,school.location],(error,results,fields)=>{
+        if (error) {throw error};
+        
+        sql.query('INSERT INTO users VALUES (?,?,?,?,?,?,?,?)', [],(error,results,fields)=>{
+        if (error) {throw error};
+        
+        });
+    });
 }
 
 /*

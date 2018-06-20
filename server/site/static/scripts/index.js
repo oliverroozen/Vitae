@@ -10,7 +10,7 @@ var currentlyEditing = false;
 var WScallbacks = [];
 var userData = {};
 
-establishWebsocket();
+//establishWebsocket();
 
 // As soon as the DOM is ready to manipulate...
 $(document).ready(()=>{
@@ -50,20 +50,23 @@ $(document).ready(()=>{
 
 function attemptLogin() {
 	// Submit code
-	var submittedUsername = $('#username').val();
-	var submittedPassword = $('#password').val();
+	var submittedUsername = $('#username').val().trim();
+	var submittedPassword = $('#password').val().trim();
 	
 	console.log('Attempting login...');
 	
 	if (submittedUsername.length > 0 && submittedPassword.length > 8) {
+        var dataInput = {"username":submittedUsername,"password":submittedPassword};
 		// Potentially viable details
         $.ajax({
-            url: window.location.host + "/validate",
-            data: {username:submittedUsername,password:submittedPassword},
-            dataType: 'json',
-            method: 'POST'
+            url: '/validate',
+            data: JSON.stringify(dataInput),
+            dataType: 'JSON',
+            contentType: "application/json",
+            method: 'POST',
+            timeout: 5000,
         }).done((data)=>{
-            
+            console.log(data);
         });
         
 //		handleWS('signin', {username:submittedUsername,password:submittedPassword}, (session)=>{
