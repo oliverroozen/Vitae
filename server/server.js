@@ -136,13 +136,25 @@ app.get('/', function (req, res) {
 		if (error) throw error;
 		
 		if (results.length == 0) {
-			res.render('login', {randVer: Math.round(Math.random()*1000)});
+			res.redirect('login');
 		} else {
 			res.render('index', {randVer: Math.round(Math.random()*1000)});
+			console.log(`index served to ${req.ip} in ${res.getHeader("X-Response-Time")}ms`);
 		}
 	});
-	
-    console.log(`index served to ${req.ip} in ${res.getHeader("X-Response-Time")}ms`);
+});
+
+app.get('/login', function (req, res) {
+	sql.query('SELECT userID FROM users WHERE sessionID = ? AND sessionCreation < (NOW()-1)', [req.session.userID],(error,results,fields)=>{
+		if (error) throw error;
+		
+		if (results.length != 0) {
+			res.redirect('/');
+		} else {
+			res.render('login', {randVer: Math.round(Math.random()*1000)});
+			console.log(`login served to ${req.ip} in ${res.getHeader("X-Response-Time")}ms`);
+		}
+	});
 });
 
 app.post('/validate', function (req, res) {
