@@ -1,0 +1,38 @@
+div#header {
+    width: 100vw;
+    height: 7vh;
+    background-color: rgba(255,255,255,0.7);
+    position: relative;
+    svg, img {
+        height: inherit;
+    }
+    .account img {
+        clip-path: circle(95%);
+        border-radius: 40%
+    }
+    div {
+        > a {
+            display: inline-block;
+            height: inherit;
+        }
+        > input {
+            height: inherit;
+            box-sizing: border-box;
+        }
+        height:100%;
+    }
+    .left {
+        float: none;
+        display: inline-block;
+        height: inherit;
+    }
+    .middle {
+        position: absolute;
+        left: 50%;
+        transform: translate(-50%);
+    }
+    .right {
+        float: right;
+        height: inherit;
+    }
+}

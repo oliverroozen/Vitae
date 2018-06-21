@@ -104,7 +104,7 @@ function successfulLogin() {
 	$("div#backgroundicon svg").addClass('iconExitAnim');
 	$(".container .box").css({opacity:0});
 	setTimeout(()=>{
-		
+		window.location.replace('../');
 	},1500);
 	
 	return('Logged in.');

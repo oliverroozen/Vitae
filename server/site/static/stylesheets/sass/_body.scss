@@ -1,9 +1,13 @@
 body {
 	width: 100vw;
 	height: 100vh;
-	background-color: rgb(25,25,25);
+    $dark-lines: rgb(25,25,25);
+    $light-lines: rgb(30,30,30);
+    // Angle, initial colour, bright-width, diffuse, dark-width
+    background: repeating-linear-gradient(-55deg,$dark-lines,$dark-lines 5px,$light-lines 0px,$light-lines 10px);
 	float:left;
 	display:inline-block;
+    -webkit-backface-visibility: hidden;
 	div.container {
 		text-align: center;
 		width: 90vw;
