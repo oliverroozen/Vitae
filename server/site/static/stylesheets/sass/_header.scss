@@ -1,10 +1,12 @@
 div#header {
     width: 100vw;
-    height: 50px;
-    background-color: rgba(255,255,255,0.7);
+    height: 45px;
+    background-color: rgba(255,255,255,0.3);
     position: relative;
+    transition: top 1.5s ease-out;
     svg, img {
-        height: inherit;
+        height: 100%;
+        fill: white;
     }
     .account img {
         clip-path: circle(95%);
@@ -14,10 +16,24 @@ div#header {
         > a {
             display: inline-block;
             height: inherit;
+            padding: 7px;
+            box-sizing: border-box;
         }
         > input {
             height: inherit;
             box-sizing: border-box;
+            border-radius: 100vh;
+            background-color: $dark-lines;
+            border-color: $light-lines;
+            border-width: 4px;
+        }
+        > a.notifications {
+            padding: 10px;
+            float:left;
+            svg {
+                stroke: black;
+                stroke-width: 5px;
+            }
         }
         height:100%;
     }

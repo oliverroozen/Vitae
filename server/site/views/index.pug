@@ -4,11 +4,11 @@ html(lang='en')
 		include head
 	body#timeline
 		div#backgroundicon.centered
-		div#header
+		div#header(style='top:-45px')
 			div.left
 				a.login(onclick='') Vitae
 			div.middle
-				input#search.inputA(name='search', spellcheck='true', autocomplete='on', maxlength='256', placeholder='search Vitae', type='text')
+				input#search.inputA(name='search', spellcheck='true', autocomplete='on', maxlength='256', placeholder='search', type='text')
 			div.right
 				a.imageButton.notifications(onclick='')
 					include ../static/assets/notification.svg

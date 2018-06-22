@@ -23,6 +23,10 @@ $(document).ready(()=>{
         }
     });
     
+    if (window.location.pathname == '/') {
+        $('#header').css({top:'0px'});
+    }
+    
 //    // Waiting until background image is ready to start slideshow...
 //    if ($(background).prop('complete')) {
 //        initBackground();
