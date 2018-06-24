@@ -46,11 +46,45 @@ body {
 		display: block;
 		div.main {
 			div.article {
+				color: white;
 				max-width: 620px;
 				clear: both;
 				float: right;
-				img.avatar {
+				background-color: rgba(255,255,255,0.075);
+//				padding:10px;
+				border-radius: 15px;
+				margin-bottom: 40px;
+				border: rgba(255,255,255,0.75) solid 2px;
+				text-align: left;
+				.head {
+					height: 50px;
+					width:100%;
+					padding: 7px 15px 7px 15px;
+					display: inline-block;
+					box-sizing: border-box;
+					div.user {
+						height: 100%;
+					}
+					img {
+						height: 100%;
+						margin-right: 10px;
+					}
+					p {
+						float: right;
+						vertical-align: middle;
+						line-height: 100%;
+						position: relative;
+						top: 50%;
+						transform: translateY(-50%);
+					}
+				}
+				img.post {
 					width: 100%;
+				}
+				div.conversation {
+					padding: 10px;
+					padding-top: 5px;
+					padding-left: 15px;
 				}
 			}
 		}

@@ -1,8 +1,9 @@
 //- postID, userID, postTime, description
 div.article
-	div.head
-		p= userID
-		img(src=``)
-	img.avatar(src=`images/${postID}.jpg`)
-	div.description
+	a.head.account
+		div.user
+			img(src='assets/avatar.jpg')
+			p= userID
+	img.post(src=`images/${postID}.jpg`)
+	div.conversation
 		p= description

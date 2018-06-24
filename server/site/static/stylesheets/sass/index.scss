@@ -95,6 +95,11 @@ a:hover {
 	color: lighten(desaturate($motif-colour, 2%),10%);
 }
 
+.account img {
+	clip-path: circle(95%);
+	border-radius: 40%
+}
+
 .centered {
     position:absolute;
     top:50%;
