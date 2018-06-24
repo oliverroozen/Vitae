@@ -40,6 +40,15 @@ body {
 			}
 		}	
 	}
+	div#content {
+		div.main {
+			div.article {
+				img.avatar {
+					width:620px;
+				}
+			}
+		}
+	}
 	div#backgroundicon {
 		opacity: 0.15;
 		@media (min-aspect-ratio: 1/1) {

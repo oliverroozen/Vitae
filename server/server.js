@@ -46,6 +46,7 @@ app.set('views', 'site/views');
 app.set('view engine', 'pug');
 
 app.use(express.static('site/static'));
+app.use(express.static('site/content'));
 app.use(responseTime({digits:0, suffix:false}));
 app.use(bodyParser.json());
 app.use(sessionParser);
@@ -56,16 +57,6 @@ sql.connect((err)=>{
     } else {
         sql.query('CREATE DATABASE IF NOT EXISTS Vitae',(err)=>{
 			sql.changeUser({database : 'Vitae'}, function(err) {if (err) throw err;});
-			sql.query(`CREATE TABLE IF NOT EXISTS sessions (
-				sessionID INT NOT NULL AUTO_INCREMENT,
-				sessionUUID VARCHAR(36)	NOT NULL,
-				sessionCreation DATETIME NOT NULL,
-				userID INT NOT NULL,
-				PRIMARY KEY (sessionID),
-				FOREIGN KEY (userID) REFERENCES users(userID)
-			)`, (err)=>{
-				if (err) {console.log(err)};
-			});
 			sql.query(`CREATE TABLE IF NOT EXISTS schools (
 				schoolID SMALLINT NOT NULL AUTO_INCREMENT,
 				nzqaNum SMALLINT NOT NULL,
@@ -110,6 +101,16 @@ sql.connect((err)=>{
 				content VARCHAR(256) NOT NULL,
 				PRIMARY KEY (commentID),
 				FOREIGN KEY (postID) REFERENCES posts(postID)
+			)`, (err)=>{
+				if (err) {console.log(err)};
+			});
+			sql.query(`CREATE TABLE IF NOT EXISTS sessions (
+				sessionID INT NOT NULL AUTO_INCREMENT,
+				sessionUUID VARCHAR(36)	NOT NULL,
+				sessionCreation DATETIME NOT NULL,
+				userID INT NOT NULL,
+				PRIMARY KEY (sessionID),
+				FOREIGN KEY (userID) REFERENCES users(userID)
 			)`, (err)=>{
 				if (err) {console.log(err)};
 			});
@@ -195,25 +196,21 @@ app.post('/validate', function (req, res) {
     });
 });
 
-app.post('/post', function (req, res) {
-    console.log(req.body);
+app.post('/article', function (req, res) {
+    console.log('Article requested...');
     
-    sql.query('SELECT userID FROM users WHERE username = ? AND password = ?', [req.body.username,req.body.password],(error,results,fields)=>{
+    sql.query('SELECT postID, userID, postTime, description FROM posts WHERE postType = ? ORDER BY postTime LIMIT 1',['imge'],(error,results,fields)=>{
         if (error) throw error;
 		
 		console.log(JSON.stringify(results));
 
         if (results.length == 0) {
-            // Send response to let client know server handled successfully, but with no returns
-            console.log('Details are invalid.');
-            res.json({result:'FAIL',message:'Details are invalid.'});
+            res.json({result:'FAIL',data:"There's nothing to see."});
         } else {
-            var newSessionID = uuidv4();
-            sql.query('INSERT INTO sessions (userID, sessionUUID, sessionCreation) VALUES (?,?,CURRENT_TIMESTAMP())', [results[0].userID,newSessionID],(error,results,fields)=>{
-                if (error) throw error;
-            });
-            req.session.userID = newSessionID;
-            res.json({result:'OK',message:'Session updated.'});
+            app.render('article', results[0],(err,html)=>{
+				if (err) throw err;
+				res.json({result:'OK',data:html});
+			});
         }
     });
 });
@@ -358,14 +355,19 @@ function insertTestUserData() {
 }
 
 function insertTestPostData() {
-	var post = {
-		postType: 'imge',
-		userID: 1,
-		privacyLevel: 0,
-		description: "Look at dis cool image!"
-	}
+	// postType, userID, privacyLevel, description
+	var posts = [
+		['imge',1,0,"Look at dis cool image!"],
+		['imge',1,0,"Fleek on point yo"],
+		['imge',1,0,"Help"],
+		['imge',1,0,"'And how can man die better, than facing fearful odds, for the ashes of his fathers, and the temples of his gods?'"],
+		['imge',1,0,"XOXOXO Luv u gurls"],
+		['imge',1,0,"Rest in piece XXX"],
+		['imge',1,0,"Zac the cat is life"],
+		['imge',1,0,"Le kek™"]
+	];
 	
-	sql.query('INSERT INTO posts (postType,userID,privacyLevel,description) VALUES (?,?,?,?)', [post.postType,post.userID,post.privacyLevel,post.description],(error,results,fields)=>{
+	sql.query('INSERT INTO posts (postType,userID,privacyLevel,description) VALUES ?', [posts],(error,results,fields)=>{
 		if (error) {throw error};
 		console.log('Inserted test post data into the database.');
 	});

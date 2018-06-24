@@ -1,5 +1,8 @@
-mixin article(postID,userID,username,description)
-	div.article
-		img(src='')
-		div.description
-			p= description
+//- postID, userID, postTime, description
+div.article
+	div.head
+		p= userID
+		img(src=``)
+	img.avatar(src=`images/${postID}.jpg`)
+	div.description
+		p= description

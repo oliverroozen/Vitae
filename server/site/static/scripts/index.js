@@ -25,6 +25,8 @@ $(document).ready(()=>{
     
     if (window.location.pathname == '/') {
         $('#header').css({top:'0px'});
+		
+		fetchArticle();
     }
     
 //    // Waiting until background image is ready to start slideshow...
@@ -58,6 +60,27 @@ $(document).ready(()=>{
 //        ]);
 //    }
 });
+
+function fetchArticle() {
+	const postLimit = 8;
+	for (var count = 0; count <= postLimit; count++) {
+		$.ajax({
+			url: '/article',
+//			data: JSON.stringify(dataInput),
+//			dataType: 'JSON',
+			contentType: "application/json",
+			method: 'POST',
+			timeout: 5000,
+		}).done((response)=>{
+			console.log(response);
+			if (response.result == 'OK') {
+				$('#content div.main').append(response.data);
+			} else {
+				console.log('The server has rejected the AJAX request.');
+			}
+		});
+	}
+}
 
 function attemptLogin() {
 	// Submit code
