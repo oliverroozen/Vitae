@@ -56,6 +56,16 @@ sql.connect((err)=>{
     } else {
         sql.query('CREATE DATABASE IF NOT EXISTS Vitae',(err)=>{
 			sql.changeUser({database : 'Vitae'}, function(err) {if (err) throw err;});
+			sql.query(`CREATE TABLE IF NOT EXISTS sessions (
+				sessionID INT NOT NULL AUTO_INCREMENT,
+				sessionUUID VARCHAR(36)	NOT NULL,
+				sessionCreation DATETIME NOT NULL,
+				userID INT NOT NULL,
+				PRIMARY KEY (sessionID),
+				FOREIGN KEY (userID) REFERENCES users(userID)
+			)`, (err)=>{
+				if (err) {console.log(err)};
+			});
 			sql.query(`CREATE TABLE IF NOT EXISTS schools (
 				schoolID SMALLINT NOT NULL AUTO_INCREMENT,
 				nzqaNum SMALLINT NOT NULL,
@@ -69,8 +79,6 @@ sql.connect((err)=>{
 				userID INT NOT NULL AUTO_INCREMENT,
                 username VARCHAR(255) NOT NULL UNIQUE,
                 password VARCHAR(255) NOT NULL,
-                sessionID VARCHAR(36),
-                sessionCreation DATETIME,
 				accountType CHAR(4) NOT NULL,
 				schoolID SMALLINT NOT NULL,
 				nzqaNum INT NOT NULL,
@@ -117,13 +125,18 @@ sql.connect((err)=>{
 //					if (err.errno != 1359) {console.log(err)} else {console.log('Caught error on create trigger.')};
 //				};
 //			});
-
 			console.log('Connected to database...');
+			
+			// ----------------- Inserting test data ---------------------
+			sql.query('SELECT userID FROM users',(error,results,fields)=>{
+				if (error) throw error;
+				if (results.length == 0) {
+					insertTestUserData();
+				}
+			});
 
 			server.listen(2001,()=>{
 				console.log('Online on port 2001!');
-//				insertTestUserData();
-//				insertTestPostData();
 			});
 		});
     }
@@ -132,8 +145,10 @@ sql.connect((err)=>{
 app.get('/', function (req, res) {
 	console.log(req.session.userID);
 	
-	sql.query('SELECT userID FROM users WHERE sessionID = ? AND sessionCreation < (NOW()-1)', [req.session.userID],(error,results,fields)=>{
+	sql.query('SELECT userID FROM sessions WHERE sessionUUID = ? AND sessionCreation < (NOW()-1)', [req.session.userID],(error,results,fields)=>{
 		if (error) throw error;
+		
+		console.log('Rendering index. Results: ' + results);
 		
 		if (results.length == 0) {
 			res.redirect('login');
@@ -145,7 +160,7 @@ app.get('/', function (req, res) {
 });
 
 app.get('/login', function (req, res) {
-	sql.query('SELECT userID FROM users WHERE sessionID = ? AND sessionCreation < (NOW()-1)', [req.session.userID],(error,results,fields)=>{
+	sql.query('SELECT userID FROM sessions WHERE sessionUUID = ? AND sessionCreation < (NOW()-1)', [req.session.userID],(error,results,fields)=>{
 		if (error) throw error;
 		
 		if (results.length != 0) {
@@ -162,6 +177,8 @@ app.post('/validate', function (req, res) {
     
     sql.query('SELECT userID FROM users WHERE username = ? AND password = ?', [req.body.username,req.body.password],(error,results,fields)=>{
         if (error) throw error;
+		
+		console.log(JSON.stringify(results));
 
         if (results.length == 0) {
             // Send response to let client know server handled successfully, but with no returns
@@ -169,7 +186,30 @@ app.post('/validate', function (req, res) {
             res.json({result:'FAIL',message:'Details are invalid.'});
         } else {
             var newSessionID = uuidv4();
-            sql.query('UPDATE users SET sessionID = ?, sessionCreation = CURRENT_TIMESTAMP()', [newSessionID],(error,results,fields)=>{
+            sql.query('INSERT INTO sessions (userID, sessionUUID, sessionCreation) VALUES (?,?,CURRENT_TIMESTAMP())', [results[0].userID,newSessionID],(error,results,fields)=>{
+                if (error) throw error;
+            });
+            req.session.userID = newSessionID;
+            res.json({result:'OK',message:'Session updated.'});
+        }
+    });
+});
+
+app.post('/post', function (req, res) {
+    console.log(req.body);
+    
+    sql.query('SELECT userID FROM users WHERE username = ? AND password = ?', [req.body.username,req.body.password],(error,results,fields)=>{
+        if (error) throw error;
+		
+		console.log(JSON.stringify(results));
+
+        if (results.length == 0) {
+            // Send response to let client know server handled successfully, but with no returns
+            console.log('Details are invalid.');
+            res.json({result:'FAIL',message:'Details are invalid.'});
+        } else {
+            var newSessionID = uuidv4();
+            sql.query('INSERT INTO sessions (userID, sessionUUID, sessionCreation) VALUES (?,?,CURRENT_TIMESTAMP())', [results[0].userID,newSessionID],(error,results,fields)=>{
                 if (error) throw error;
             });
             req.session.userID = newSessionID;
@@ -292,7 +332,7 @@ function heartbeat() {
 function insertTestUserData() {
     var user = {
         username: 'roozeno',
-        password: 'admin1234',
+        password: 'admin123',
         accountType: 'stdt',
         schoolID: 1,
         nzqaNum: 126555266,
@@ -312,6 +352,7 @@ function insertTestUserData() {
         sql.query('INSERT INTO users (username,password,accountType,schoolID,nzqaNum,fullName,yearLevel,bio) VALUES (?,?,?,?,?,?,?,?)', [user.username,user.password,user.accountType,user.schoolID,user.nzqaNum,user.fullName,user.yearLevel,user.bio],(error,results,fields)=>{
         if (error) {throw error};
         	console.log('Inserted test user data into the database.');
+			insertTestPostData();
         });
     });
 }
