@@ -3,8 +3,8 @@ body {
 //	height: 100vh;
     // Angle, initial colour, bright-width, diffuse, dark-width
     background: repeating-linear-gradient(-55deg,$dark-lines,$dark-lines 5px,$light-lines 0px,$light-lines 10px);
-	float:left;
-	display:inline-block;
+//	float:left;
+	display:block;
     -webkit-backface-visibility: hidden;
 	div.container {
 		text-align: center;
@@ -43,9 +43,12 @@ body {
 	div#content {
 		padding: 5vw;
 		text-align: center;
+		display: block;
 		div.main {
 			div.article {
 				max-width: 620px;
+				clear: both;
+				float: right;
 				img.avatar {
 					width: 100%;
 				}
@@ -67,16 +70,24 @@ body {
         }
 	}
 	div#footer {
-		color: rgb(120,120,120);
 		font-family: 'Gravity';
 		font-size: 0.8em;
 		padding: 10px;
 		bottom:0px;
-//		width: 100vw;
-		position: absolute;
-		text-align: center;
 	}
 }
+
+body#login {
+	display: inline-block;
+	div#footer {
+		color: rgb(120,120,120);
+		position: absolute;
+		text-align: center;
+		width: 100vw;
+		box-sizing: border-box;
+	}
+}
+
 body#timeline {
 	div#footer {
 		height: 100px;
