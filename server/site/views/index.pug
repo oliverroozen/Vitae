@@ -6,9 +6,11 @@ html(lang='en')
 		div#backgroundicon.centered
 		div#header(style='top:-45px')
 			div.left
-				a.login(onclick='') Vitae
+				a.login(onclick='')
+					include ../static/assets/vitae-title.svg
 			div.middle
-				input#search.inputA(name='search', spellcheck='true', autocomplete='on', maxlength='256', placeholder='search', type='text')
+				input#search.inputA(name='search', spellcheck='true', autocomplete='on', maxlength='256', placeholder='', type='text')
+				include ../static/assets/search.svg
 			div.right
 				a.imageButton.notifications(onclick='')
 					include ../static/assets/notification.svg

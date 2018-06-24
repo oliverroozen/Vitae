@@ -1,6 +1,6 @@
 div#header {
     width: 100vw;
-    height: 45px;
+    height: 48px;
     background-color: rgba(255,255,255,0.3);
     position: relative;
     transition: top 1.5s ease-out;
@@ -16,19 +16,21 @@ div#header {
         > a {
             display: inline-block;
             height: inherit;
-            padding: 7px;
+            padding: 10px;
             box-sizing: border-box;
         }
         > input {
             height: inherit;
             box-sizing: border-box;
-            border-radius: 100vh;
+            border-radius: 20px 20px 5px 5px;
             background-color: $dark-lines;
             border-color: $light-lines;
             border-width: 4px;
+			color: white;
+			font-size: 0.95em;
         }
         > a.notifications {
-            padding: 10px;
+            padding: 12px;
             float:left;
             svg {
                 stroke: black;
@@ -46,6 +48,11 @@ div#header {
         position: absolute;
         left: 50%;
         transform: translate(-50%);
+		svg {
+			position: absolute;
+			display: inline-block;
+			display: none;
+		}
     }
     .right {
         float: right;
