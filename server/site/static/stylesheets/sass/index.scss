@@ -2,6 +2,7 @@ $motif-colour: rgb(255,205,80);
 $error-colour: rgb(255,120,120);
 $dark-lines: rgb(25,25,25);
 $light-lines: rgb(28,28,28);
+$light-panel: rgba(255,255,255,0.3);
 
 @mixin filter($filters) {
     -webkit-filter: $filters;
@@ -36,6 +37,7 @@ $light-lines: rgb(28,28,28);
  
 @import 'reset';
 @import 'header';
+@import 'footer';
 @import 'body';
 
 @font-face {

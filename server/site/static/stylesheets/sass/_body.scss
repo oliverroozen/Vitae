@@ -1,6 +1,6 @@
 body {
-	width: 100vw;
-	height: 100vh;
+//	width: 100vw;
+//	height: 100vh;
     // Angle, initial colour, bright-width, diffuse, dark-width
     background: repeating-linear-gradient(-55deg,$dark-lines,$dark-lines 5px,$light-lines 0px,$light-lines 10px);
 	float:left;
@@ -41,10 +41,13 @@ body {
 		}	
 	}
 	div#content {
+		padding: 5vw;
+		text-align: center;
 		div.main {
 			div.article {
+				max-width: 620px;
 				img.avatar {
-					width:620px;
+					width: 100%;
 				}
 			}
 		}
@@ -63,17 +66,28 @@ body {
             transition: stroke 800ms;
         }
 	}
-	div.footer {
+	div#footer {
 		color: rgb(120,120,120);
 		font-family: 'Gravity';
 		font-size: 0.8em;
 		padding: 10px;
 		bottom:0px;
-		width: 100vw;
+//		width: 100vw;
 		position: absolute;
 		text-align: center;
 	}
 }
+body#timeline {
+	div#footer {
+		height: 100px;
+		bottom: 0px;
+		position: relative;
+		background-color: $light-panel;
+		color: white;
+		display: block;
+	}
+}
+
 body#login::-webkit-scrollbar { 
     display: none;
 }

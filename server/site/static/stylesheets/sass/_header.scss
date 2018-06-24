@@ -1,7 +1,7 @@
 div#header {
-    width: 100vw;
+	display: block;
     height: 48px;
-    background-color: rgba(255,255,255,0.3);
+    background-color: $light-panel;
     position: relative;
     transition: top 1.5s ease-out;
     svg, img {
