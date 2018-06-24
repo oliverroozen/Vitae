@@ -66,7 +66,7 @@ function attemptLogin() {
 	
 	console.log('Attempting login...');
 	
-	if (submittedUsername.length > 0 && submittedPassword.length > 8) {
+	if (submittedUsername.length > 0 && submittedPassword.length >= 8) {
         var dataInput = {"username":submittedUsername,"password":submittedPassword};
 		// Potentially viable details
         $.ajax({
