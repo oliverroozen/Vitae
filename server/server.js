@@ -137,14 +137,16 @@ sql.connect((err)=>{
 
 // User requests index page (timeline)
 app.get('/', function (req, res) {
+	console.log('Index requested...');
 	console.log("The session ID for this user is: " + req.session.sessionUUID);
 	
 	// Query to see if the client has an existing and valid session
-	sql.query('SELECT userID FROM sessions WHERE sessionUUID = ? AND sessionCreation < (NOW()-1)', [req.session.userID],(error,results,fields)=>{
+	sql.query('SELECT userID FROM sessions WHERE sessionUUID = ? AND sessionCreation > (NOW()-1)', [req.session.sessionUUID],(error,results,fields)=>{
 		if (error) throw error;
 		
-		console.log('User data: ' + results);
+		console.log('User data found in database: ' + results);
 		
+		// If no valid session is found, auto-redirect to login page, otherwise serve index
 		if (results.length == 0) {
 			console.log('Requested index, redirecting to login.');
 			res.redirect('login');
@@ -157,14 +159,16 @@ app.get('/', function (req, res) {
 
 // User requests the login page
 app.get('/login', function (req, res) {
+	console.log('Login requested...');
 	console.log("The session ID for this user is: " + req.session.sessionUUID);
 	
 	// Query to see if the client has an existing and valid session
-	sql.query('SELECT userID FROM sessions WHERE sessionUUID = ? AND sessionCreation < (NOW()-1)', [req.session.userID],(error,results,fields)=>{
+	sql.query('SELECT userID FROM sessions WHERE sessionUUID = ? AND sessionCreation > (NOW()-1)', [req.session.sessionUUID],(error,results,fields)=>{
 		if (error) throw error;
 		
-		console.log('User data: ' + results);
+		console.log('User data found in database: ' + results);
 		
+		// If a valid session is found, auto-redirect to index (timeline), otherwise serve login page
 		if (results.length != 0) {
 			console.log('Requested login, redirecting to index.');
 			res.redirect('/');
@@ -175,26 +179,34 @@ app.get('/login', function (req, res) {
 	});
 });
 
-// AJAX async requests the validate page with POST data
+// AJAX async requests the validate page to check user-entered credentials
 app.post('/validate', function (req, res) {
+	console.log('Validate requested...');
     console.log("Given details: " + JSON.stringify(req.body));
     
+	// Query to see if the username and password match a user in the database
     sql.query('SELECT userID FROM users WHERE username = ? AND password = ?', [req.body.username,req.body.password],(error,results,fields)=>{
         if (error) throw error;
 		
 		console.log("Checked details against database and found: " + JSON.stringify(results));
 
+		// If no user is found, respond with an invalid details notice. Otherwise, create new session...
         if (results.length == 0) {
             // Send response to let client know server handled successfully, but with no returns
             console.log('Details are invalid.');
             res.json({result:'FAIL',message:'Details are invalid.'});
         } else {
+			// Create a new UUID4 for a session
             var newSessionID = uuidv4();
+			
+			// Insert this new session ID into the sessions database
             sql.query('INSERT INTO sessions (userID, sessionUUID, sessionCreation) VALUES (?,?,CURRENT_TIMESTAMP())', [results[0].userID,newSessionID],(error,results,fields)=>{
                 if (error) throw error;
+				
+				// Set this UUID to the session variable, and send success response to client
+				req.session.sessionUUID = newSessionID;
+				res.json({result:'OK',message:'Session updated.'});
             });
-            req.session.sessionUUID = newSessionID;
-            res.json({result:'OK',message:'Session updated.'});
         }
     });
 });
