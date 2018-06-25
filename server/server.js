@@ -141,7 +141,8 @@ app.get('/', function (req, res) {
 	console.log("The session ID for this user is: " + req.session.sessionUUID);
 	
 	// Query to see if the client has an existing and valid session
-	sql.query('SELECT userID FROM sessions WHERE sessionUUID = ? AND sessionCreation > (NOW()-1)', [req.session.sessionUUID],(error,results,fields)=>{
+    // AND sessionCreation > (NOW()-1) | this seems to be creating an error
+	sql.query('SELECT userID FROM sessions WHERE sessionUUID = ?', [req.session.sessionUUID],(error,results,fields)=>{
 		if (error) throw error;
 		
 		console.log('User data found in database: ' + results);
@@ -163,7 +164,7 @@ app.get('/login', function (req, res) {
 	console.log("The session ID for this user is: " + req.session.sessionUUID);
 	
 	// Query to see if the client has an existing and valid session
-	sql.query('SELECT userID FROM sessions WHERE sessionUUID = ? AND sessionCreation > (NOW()-1)', [req.session.sessionUUID],(error,results,fields)=>{
+	sql.query('SELECT userID FROM sessions WHERE sessionUUID = ?', [req.session.sessionUUID],(error,results,fields)=>{
 		if (error) throw error;
 		
 		console.log('User data found in database: ' + results);
