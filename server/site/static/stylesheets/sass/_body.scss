@@ -136,9 +136,16 @@ body#timeline {
 		height: 100px;
 		bottom: 0px;
 		position: relative;
-		background-color: $light-panel;
+//		background: linear-gradient(124deg, #ff2400, #e81d1d, #e8b71d, #e3e81d, #1de840, #1ddde8, #2b1de8, #dd00f3, #dd00f3);
 		color: white;
 		display: block;
+		.loading {
+			opacity: 0;
+			transition: opacity 1.5s ease-in-out 2s;
+			left: 50%;
+			transform: translateX(-50%);
+			position: absolute;
+		}
 	}
 }
 

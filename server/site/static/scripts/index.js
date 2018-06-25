@@ -18,9 +18,18 @@ $(document).ready(()=>{
     if (window.location.pathname == '/') {
         $('#header').css({top:'0px'});
 		
+		$('#footer .loading').css({opacity:1});
 		fetchArticle(0,8);
     }
-    
+	
+	$(document).scroll(()=>{
+		console.log('Scroll event.');
+		if (isScrolledIntoView('#footer')) {
+			console.log('Item scrolled into view.');
+			footerLoad();
+		};
+	})
+	
 //    // Waiting until background image is ready to start slideshow...
 //    if ($(background).prop('complete')) {
 //        initBackground();
@@ -68,6 +77,20 @@ function preload(url,callback) {
 	preloadImages[index].onload = function() {
 		callback();
 	}
+}
+
+function footerLoad() {
+//	$('#footer').animate({gradient:'linear-gradient(12deg, #ff2400, #e81d1d, #e8b71d, #e3e81d, #1de840, #1ddde8, #2b1de8, #dd00f3, #dd00f3)'});
+}
+
+function isScrolledIntoView(elem) {
+    var docViewTop = $(window).scrollTop();
+    var docViewBottom = docViewTop + $(window).height();
+
+    var elemTop = $(elem).offset().top;
+    var elemBottom = elemTop + $(elem).height();
+
+    return ((elemBottom <= docViewBottom) && (elemTop >= docViewTop));
 }
 
 function attemptLogin() {
