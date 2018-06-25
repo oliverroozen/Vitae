@@ -47,6 +47,7 @@ body {
 		div.main {
 			div.article {
 				color: white;
+                backdrop-filter: blur(3px);
 				max-width: 620px;
 				clear: both;
 				float: right;

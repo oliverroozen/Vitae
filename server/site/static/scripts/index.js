@@ -62,19 +62,22 @@ $(document).ready(()=>{
 });
 
 function fetchArticle() {
-	const postLimit = 8;
+    const timeline = $('#content div.main');
+    const fromID = timeline.last().attr('postID');
+    const postLimit = 8;
+    
 	for (var count = 0; count <= postLimit; count++) {
 		$.ajax({
 			url: '/article',
-//			data: JSON.stringify(dataInput),
-//			dataType: 'JSON',
+			data: fromID,
+			dataType: 'JSON',
 			contentType: "application/json",
 			method: 'POST',
 			timeout: 5000,
 		}).done((response)=>{
 			console.log(response);
 			if (response.result == 'OK') {
-				$('#content div.main').append(response.data);
+				timeline.append(response.data);
 			} else {
 				console.log('The server has rejected the AJAX request.');
 			}

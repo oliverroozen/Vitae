@@ -197,9 +197,9 @@ app.post('/validate', function (req, res) {
 });
 
 app.post('/article', function (req, res) {
-    console.log('Article requested...');
+    console.log('Article requested: ' + JSON.stringify(req.body));
     
-    sql.query('SELECT postID, posts.userID, users.username, postTime, description FROM posts JOIN users ON posts.userID = users.userID WHERE postType = ? ORDER BY postTime LIMIT 1',['imge'],(error,results,fields)=>{
+    sql.query('SELECT postID, posts.userID, users.username, postTime, description FROM posts JOIN users ON posts.userID = users.userID WHERE (postType = ? AND postID < 4) ORDER BY postTime, postID LIMIT 1',['imge',req.body],(error,results,fields)=>{
         if (error) throw error;
 		
 		console.log(JSON.stringify(results));
