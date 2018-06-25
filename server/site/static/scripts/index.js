@@ -1,16 +1,8 @@
 "use strict";
 
 // Global constant declarations for general use across program
-const callDate = new Date();
 const host = "ws://" + window.location.host;
-
-var serverSocket;
-var connectionRetry;
-var currentlyEditing = false;
-var WScallbacks = [];
-var userData = {};
-
-//establishWebsocket();
+var preloadImages = [];
 
 // As soon as the DOM is ready to manipulate...
 $(document).ready(()=>{
@@ -37,28 +29,6 @@ $(document).ready(()=>{
 //            initBackground();
 //        });
 //    }
-    
-//    // Ping the server to see if a logged user account is valid. If so, load and enter program.
-//    if (Cookies.get('userID') != undefined) {
-//        handleWS('signin', {id:Cookies.get('userID')}, (user)=>{
-//            if (user == false) {
-//                revisionDisplay.load('#exampleDisplay', [
-//                    ["Science","Technology","Engineering","Arts","Mathematics"],
-//                    [1,1,1,1,1]
-//                ]);
-//            } else {
-//                console.log('%cWelcome back, student!','background: #222; color: rgb(5,255,255); font-size:1.5em; padding:3px;');
-//                
-//                revisionDisplay.load('#exampleDisplay', revisionDisplay.calcImportance(user.assessments));
-//                loadMain();
-//            }
-//        });
-//    } else {
-//        revisionDisplay.load('#exampleDisplay', [
-//            ["Science","Technology","Engineering","Arts","Mathematics"],
-//            [1,1,1,1,1]
-//        ]);
-//    }
 });
 
 function fetchArticle(count,max,id) {
@@ -73,15 +43,31 @@ function fetchArticle(count,max,id) {
         method: 'POST',
         timeout: 5000,
     }).done((response)=>{
-        console.log(response);
+//        console.log(response);
         if (response.result == 'OK') {
-            timeline.append(response.data);
+//			console.log(response.data.url);
+			preload(response.data.url,()=>{
+				timeline.append(response.html);
+				var newElement = $(`#content div.main .article[postid=${response.data.id}]`);
+				newElement.css({display:'initial'});
+				setTimeout(()=>{
+					newElement.css({opacity:1,top:'0px'});
+				},20);
+			});
             count++;
-            if (count < max) {fetchArticle(count,max,response.id)};
+            if (count < max) {setTimeout(()=>{fetchArticle(count,max,response.data.id)},200)};
         } else {
             console.log('The server has rejected the AJAX request.');
         }
     });
+}
+
+function preload(url,callback) {
+	var index = preloadImages.push(new Image()) - 1;
+	preloadImages[index].src = url;
+	preloadImages[index].onload = function() {
+		callback();
+	}
 }
 
 function attemptLogin() {
@@ -109,21 +95,6 @@ function attemptLogin() {
 				networkImageAnimation();
 			}
         });
-        
-//		handleWS('signin', {username:submittedUsername,password:submittedPassword}, (session)=>{
-//			if (session == false) {
-//				$('#codeInput').css(failStyle);
-//			} else {
-//				revisionDisplay.update(revisionDisplay.calcImportance(user.assessments));
-//
-//				$('#codeInput').css(succStyle);
-//				$('body#welcome .background img').css({filter:''});
-//				setTimeout(()=>{
-//					$('#accountManagement div.popup').fadeOut(300);
-//				},500)
-//				loadMain();
-//			}
-//		});
 	} else {
         networkImageAnimation();
 	}
@@ -180,50 +151,6 @@ var parralax = _.throttle((event) => { // event.pageX, event.pageY
         'transform':`translate(${(xDiff/(prlxCoef*8))-50}%,${(yDiff/(prlxCoef*8))-50}%)`
     });
 },1000/30);
-
-// Websocket code
-function establishWebsocket() {
-    serverSocket = new WebSocket(host);
-    
-    serverSocket.addEventListener('open', (event)=>{
-        console.log('Websocket connection online.');
-        $('#disconnectedOverlay').fadeOut(600);
-    });
-    serverSocket.addEventListener('close', (event)=>{
-        console.log('Socket closed.');
-        
-        connectionRetry = setTimeout(()=>{
-            establishWebsocket();
-        },5000);
-        
-        $('#disconnectedOverlay').fadeIn(600);
-    });
-    serverSocket.addEventListener('error', (event)=>{
-        console.error('Error connecting to websocket server!');
-    });
-    serverSocket.addEventListener('message', (event)=>{
-        var data = JSON.parse(event.data);
-
-        console.log(data);
-
-        if (data.process == 'reload') {
-            console.warn('Server alerted to changes, updating data.');
-            updateUser(data.user, false);
-            revisionDisplay.update(revisionDisplay.calcImportance(data.user.assessments));
-        } else {
-            if (data.user != false) {
-                updateUser(data.user, false);
-            }
-            WScallbacks[data.callback](data.user);
-            WScallbacks.splice(data.callback,1);
-        }
-    });
-}
-
-function handleWS(mode, data, callback) {
-    var lastIndex = WScallbacks.push(callback) - 1;
-    serverSocket.send(JSON.stringify({process:mode,callback:lastIndex,user:data}));
-}
 
 // Function from StackOverflow that resolves length of an object
 Object.size = function(obj) {
@@ -311,8 +238,7 @@ Number.prototype.pad = function(n) {
 }
 
 window.onbeforeunload = function() {
-    serverSocket.onclose = function () {}; // disable onclose handler first
-    serverSocket.close();
+    
 };
 
 /*
