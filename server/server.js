@@ -199,7 +199,9 @@ app.post('/validate', function (req, res) {
 app.post('/article', function (req, res) {
     console.log('Article requested: ' + JSON.stringify(req.body));
     
-    sql.query('SELECT postID, posts.userID, users.username, postTime, description FROM posts JOIN users ON posts.userID = users.userID WHERE (postType = ? AND postID < 4) ORDER BY postTime, postID LIMIT 1',['imge',req.body],(error,results,fields)=>{
+    console.log(sql.format('SELECT postID, posts.userID, users.username, postTime, description FROM posts JOIN users ON posts.userID = users.userID WHERE (postType = ? AND postID < ?) ORDER BY postTime DESC, postID DESC LIMIT 1',['imge',req.body.id,]));
+    
+    sql.query('SELECT postID, posts.userID, users.username, postTime, description FROM posts JOIN users ON posts.userID = users.userID WHERE (postType = ? AND postID < ?) ORDER BY postTime DESC, postID DESC LIMIT 1',['imge',req.body.id,],(error,results,fields)=>{
         if (error) throw error;
 		
 		console.log(JSON.stringify(results));
@@ -209,7 +211,7 @@ app.post('/article', function (req, res) {
         } else {
             app.render('article', results[0],(err,html)=>{
 				if (err) throw err;
-				res.json({result:'OK',data:html});
+				res.json({result:'OK',id:results[0].postID,data:html});
 			});
         }
     });

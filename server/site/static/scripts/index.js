@@ -26,7 +26,7 @@ $(document).ready(()=>{
     if (window.location.pathname == '/') {
         $('#header').css({top:'0px'});
 		
-		fetchArticle();
+		fetchArticle(0,8);
     }
     
 //    // Waiting until background image is ready to start slideshow...
@@ -61,28 +61,27 @@ $(document).ready(()=>{
 //    }
 });
 
-function fetchArticle() {
+function fetchArticle(count,max,id) {
     const timeline = $('#content div.main');
     const fromID = timeline.last().attr('postID');
-    const postLimit = 8;
     
-	for (var count = 0; count <= postLimit; count++) {
-		$.ajax({
-			url: '/article',
-			data: fromID,
-			dataType: 'JSON',
-			contentType: "application/json",
-			method: 'POST',
-			timeout: 5000,
-		}).done((response)=>{
-			console.log(response);
-			if (response.result == 'OK') {
-				timeline.append(response.data);
-			} else {
-				console.log('The server has rejected the AJAX request.');
-			}
-		});
-	}
+    $.ajax({
+        url: '/article',
+        data: JSON.stringify({'id':id}),
+        dataType: 'JSON',
+        contentType: "application/json",
+        method: 'POST',
+        timeout: 5000,
+    }).done((response)=>{
+        console.log(response);
+        if (response.result == 'OK') {
+            timeline.append(response.data);
+            count++;
+            if (count < max) {fetchArticle(count,max,response.id)};
+        } else {
+            console.log('The server has rejected the AJAX request.');
+        }
+    });
 }
 
 function attemptLogin() {
