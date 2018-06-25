@@ -83,6 +83,7 @@ sql.connect((err)=>{
 			});
 			sql.query(`CREATE TABLE IF NOT EXISTS posts (
 				postID INT NOT NULL AUTO_INCREMENT,
+                postUUID VARCHAR(36) UNIQUE NOT NULL,
 				postType CHAR(4) NOT NULL,
 				userID INT NOT NULL,
 				postTime DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP(),
@@ -96,6 +97,7 @@ sql.connect((err)=>{
 			});
 			sql.query(`CREATE TABLE IF NOT EXISTS comments (
 				commentID INT NOT NULL AUTO_INCREMENT,
+                commentUUID VARCHAR(36) UNIQUE NOT NULL,
 				postID INT NOT NULL,
 				postTime DATETIME DEFAULT CURRENT_TIMESTAMP(),
 				content VARCHAR(256) NOT NULL,
@@ -199,9 +201,14 @@ app.post('/validate', function (req, res) {
 app.post('/article', function (req, res) {
     console.log('Article requested: ' + JSON.stringify(req.body));
     
-    console.log(sql.format('SELECT postID, posts.userID, users.username, postTime, description FROM posts JOIN users ON posts.userID = users.userID WHERE (postType = ? AND postID < ?) ORDER BY postTime DESC, postID DESC LIMIT 1',['imge',req.body.id,]));
+    // If it is the first request (null), we remove the selector and just take the latest image
+    if (typeof req.body.id == 'number') {
+        var where = 'postType = ? AND postID < ?';
+    } else {
+        var where = 'postType = ?';
+    }
     
-    sql.query('SELECT postID, posts.userID, users.username, postTime, description FROM posts JOIN users ON posts.userID = users.userID WHERE (postType = ? AND postID < ?) ORDER BY postTime DESC, postID DESC LIMIT 1',['imge',req.body.id,],(error,results,fields)=>{
+    sql.query(`SELECT postID, posts.userID, users.username, postTime, description FROM posts JOIN users ON posts.userID = users.userID WHERE (${where}) ORDER BY postTime DESC, postID DESC LIMIT 1`,['imge',req.body.id],(error,results,fields)=>{
         if (error) throw error;
 		
 		console.log(JSON.stringify(results));
