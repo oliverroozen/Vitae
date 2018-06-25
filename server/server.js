@@ -19,15 +19,16 @@ const sessionParser = session({
   resave: false
 });
 
-const wss = new WebSocket.Server({
-  verifyClient: (info, done) => {
-    console.log('Parsing session from request...');
-    sessionParser(info.req, {}, () => {
-      console.log('Session is parsed!');
-      // We can reject the connection by returning false to done(). For example, reject here if user is unknown.
-      done(info.req.session.userId);
-    });
-  },server});
+//const wss = new WebSocket.Server({
+//  verifyClient: (info, done) => {
+//    console.log('Parsing session from request...');
+//    sessionParser(info.req, {}, () => {
+//      console.log('Session is parsed!');
+//      // We can reject the connection by returning false to done(). For example, reject here if user is unknown.
+//      done(info.req.session.userId);
+//    });
+//  },server
+//});
 
 var sql = mysql.createConnection({
     host: 'localhost',
@@ -116,18 +117,7 @@ sql.connect((err)=>{
 			)`, (err)=>{
 				if (err) {console.log(err)};
 			});
-//			sql.query(`CREATE TRIGGER setuuid
-//				BEFORE INSERT ON assessments
-//				FOR EACH ROW
-//					IF new.assessmentID IS NULL
-//					THEN
-//						SET new.assessmentID = UUID_SHORT();
-//				END IF;
-//			`, (err)=>{
-//				if (err) {
-//					if (err.errno != 1359) {console.log(err)} else {console.log('Caught error on create trigger.')};
-//				};
-//			});
+			
 			console.log('Connected to database...');
 			
 			// ----------------- Inserting test data ---------------------
@@ -208,7 +198,7 @@ app.post('/article', function (req, res) {
         var where = 'postType = ?';
     }
     
-    sql.query(`SELECT postID, posts.userID, users.username, postTime, description FROM posts JOIN users ON posts.userID = users.userID WHERE (${where}) ORDER BY postTime DESC, postID DESC LIMIT 1`,['imge',req.body.id],(error,results,fields)=>{
+    sql.query(`SELECT postID, posts.userID, users.fullName, postTime, description FROM posts JOIN users ON posts.userID = users.userID WHERE (${where}) ORDER BY postTime DESC, postID DESC LIMIT 1`,['imge',req.body.id],(error,results,fields)=>{
         if (error) throw error;
 		
 		console.log(JSON.stringify(results));
@@ -218,122 +208,11 @@ app.post('/article', function (req, res) {
         } else {
             app.render('article', results[0],(err,html)=>{
 				if (err) throw err;
-				res.json({result:'OK',id:results[0].postID,data:html});
+				res.json({result:'OK',data:{id:results[0].postID,url:`images/${results[0].postID}.jpg`},html:html});
 			});
         }
     });
 });
-
-wss.on('connection', (ws, req) => {
-    console.log('Websocket connection made!');
-    
-    req.session.userId = uuidv4(); // New session code.
-    
-//    ws.isAlive = true;
-//    ws.on('pong', heartbeat);
-    
-    ws.on('message', (message) => {
-        console.log(`WS message: ${message}`);
-        var data = JSON.parse(message);
-        
-        switch (data.process) {
-            case 'signin':
-                console.log("Submitted info: " + data.user);
-
-                sql.query('SELECT userID FROM users WHERE userID = ?', [id], function (error, results, fields) {
-                    if (error) throw error;
-
-                    if (results.length == 0) {
-                        // Send response to let client know server handled successfully, but with no returns
-                        console.log('No account found.')
-                        ws.send(JSON.stringify({callback:data.callback,user:false}));
-                    } else {
-                        // Login
-                        console.log('ID recognized, serving data...');
-                        sql.query('SELECT name, subject, format, type, start, end, time FROM assessments WHERE userID = ?', [id], function (error, results, fields) {
-                            if (error) throw error;
-
-                            console.log('Found user data.');
-                            ws.send(JSON.stringify({callback:data.callback,user:{id:id, assessments:results}}));
-                            recordWS(id,ws);
-                        });
-                        sql.query('UPDATE users SET lastLogin = CURRENT_TIMESTAMP(), lastIP = ? WHERE userID = ?', [ws._socket.remoteAddress + ws._socket.remotePort, id], function (error, results, fields) {
-                            if (error) throw error;
-                        });
-                    }
-                });
-                break;
-            default:
-                console.log('Error in data.');
-        }
-    });
-});
-
-wss.on('close', (close) => {
-    console.log('Websocket connection closed.');
-//    console.log(JSON.stringify(req));
-//    websocketUsers[data.user.id] = ws;
-});
-
-wss.on('error', (error) => {
-    console.log('Websocket connection closed due to error.');
-//    console.log(JSON.stringify(req));
-//    websocketUsers[data.user.id] = ws;
-});
-
-//const keepalive = setInterval(function ping() {
-//    for (var key in websocketUsers) {
-//        if (websocketUsers.hasOwnProperty(key)) {
-//            websocketUsers[key].forEach((ws,idx)=>{
-//                if (ws.isAlive === false) {
-//                    websocketUsers[key].splice(idx, 1);
-//                    console.log('Terminating WS for user ' + key);
-//                    console.log(websocketUsers[key].length + ' websockets connected');
-//                    return;
-////                    return ws.terminate();
-//                }
-//                ws.isAlive = false;
-//                ws.ping('', false, true);
-//            });
-//        }
-//    }
-//}, 5000);
-
-function createUser(callback,ws,ip) {
-    const newCode = generateCode(6);
-    console.log(`Creating new account with ID '${newCode}'...`);
-    sql.query('INSERT INTO users (userID, lastLogin, lastIP) VALUES (?,CURRENT_TIMESTAMP(),?)', [newCode,ip], function (error, results, fields) {
-        if (error) {
-            console.log('Error: ' + error);
-            if (error.errno == 1062) {
-                console.log('Rerolling for new code...');
-                createUser(ws,ip);
-            } else {
-                throw error;
-            }
-        } else {
-            ws.send(JSON.stringify({callback:callback,user:{id:newCode,assessments:[]}}));
-            recordWS(newCode,ws);
-        }
-    });
-}
-
-function alertUsers(id, sender) {
-    sql.query('SELECT name, subject, format, type, start, end, time FROM assessments WHERE userID = ?', [id], function (error, results, fields) {
-        if (error) throw error;
-
-        websocketUsers[id].forEach((val)=>{
-            if (val.readyState === WebSocket.OPEN && sender !== val) {
-                console.log('Alerting user of ID' + id);
-                val.send(JSON.stringify({process:'reload',callback:null,user:{id:id,assessments:results}}));
-            }
-        });
-    });
-}
-
-function heartbeat() {
-    this.isAlive = true;
-}
 
 function insertTestUserData() {
     var user = {
