@@ -135,15 +135,18 @@ sql.connect((err)=>{
     }
 });
 
+// User requests index page (timeline)
 app.get('/', function (req, res) {
-	console.log(req.session.userID);
+	console.log("The session ID for this user is: " + req.session.sessionUUID);
 	
+	// Query to see if the client has an existing and valid session
 	sql.query('SELECT userID FROM sessions WHERE sessionUUID = ? AND sessionCreation < (NOW()-1)', [req.session.userID],(error,results,fields)=>{
 		if (error) throw error;
 		
-		console.log('Rendering index. Results: ' + results);
+		console.log('User data: ' + results);
 		
 		if (results.length == 0) {
+			console.log('Requested index, redirecting to login.');
 			res.redirect('login');
 		} else {
 			res.render('index', {randVer: Math.round(Math.random()*1000)});
@@ -152,11 +155,18 @@ app.get('/', function (req, res) {
 	});
 });
 
+// User requests the login page
 app.get('/login', function (req, res) {
+	console.log("The session ID for this user is: " + req.session.sessionUUID);
+	
+	// Query to see if the client has an existing and valid session
 	sql.query('SELECT userID FROM sessions WHERE sessionUUID = ? AND sessionCreation < (NOW()-1)', [req.session.userID],(error,results,fields)=>{
 		if (error) throw error;
 		
+		console.log('User data: ' + results);
+		
 		if (results.length != 0) {
+			console.log('Requested login, redirecting to index.');
 			res.redirect('/');
 		} else {
 			res.render('login', {randVer: Math.round(Math.random()*1000)});
@@ -165,13 +175,14 @@ app.get('/login', function (req, res) {
 	});
 });
 
+// AJAX async requests the validate page with POST data
 app.post('/validate', function (req, res) {
-    console.log(req.body);
+    console.log("Given details: " + JSON.stringify(req.body));
     
     sql.query('SELECT userID FROM users WHERE username = ? AND password = ?', [req.body.username,req.body.password],(error,results,fields)=>{
         if (error) throw error;
 		
-		console.log(JSON.stringify(results));
+		console.log("Checked details against database and found: " + JSON.stringify(results));
 
         if (results.length == 0) {
             // Send response to let client know server handled successfully, but with no returns
@@ -182,12 +193,13 @@ app.post('/validate', function (req, res) {
             sql.query('INSERT INTO sessions (userID, sessionUUID, sessionCreation) VALUES (?,?,CURRENT_TIMESTAMP())', [results[0].userID,newSessionID],(error,results,fields)=>{
                 if (error) throw error;
             });
-            req.session.userID = newSessionID;
+            req.session.sessionUUID = newSessionID;
             res.json({result:'OK',message:'Session updated.'});
         }
     });
 });
 
+// AJAX async requests an individual article sub-page
 app.post('/article', function (req, res) {
     console.log('Article requested: ' + JSON.stringify(req.body));
     
