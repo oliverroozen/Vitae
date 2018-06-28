@@ -216,27 +216,27 @@ app.post('/validate', function (req, res) {
 app.post('/article', function (req, res) {
     console.log('Article requested: ' + JSON.stringify(req.body));
     
-    // If it is the first request (null), we remove the selector and just take the latest image
-    if (typeof req.body.id == 'number') {
-        var where = 'postType = ? AND postID < ?';
+    // Validation check as client data cannot always be trusted
+    if (req.body.quantity > 16 || req.body.quantity < 1 || typeof req.body.quantity !== 'number') {
+        res.json({result:'FAIL',data:"The client's request was invalid."});
     } else {
-        var where = 'postType = ?';
-    }
-    
-    sql.query(`SELECT postID, posts.userID, users.fullName, postTime, description FROM posts JOIN users ON posts.userID = users.userID WHERE (${where}) ORDER BY postTime DESC, postID DESC LIMIT 1`,['imge',req.body.id],(error,results,fields)=>{
-        if (error) throw error;
-		
-		console.log(JSON.stringify(results));
+        // Query database to select relevant posts
+        const queryString = `SELECT postID, postUUID, posts.userID, fullName, postTime, description FROM vitae.posts JOIN users ON posts.userID = users.userID WHERE postID <= IFNULL((SELECT postID FROM posts WHERE postUUID = ?), (SELECT MAX(postID))) AND postType = ? ORDER BY postTime DESC, postID DESC LIMIT ?`;
+        sql.query(queryString,[req.body.fromID,'imge',req.body.quantity],(error,results,fields)=>{
+            if (error) throw error;
 
-        if (results.length == 0) {
-            res.json({result:'FAIL',data:"There's nothing to see."});
-        } else {
-            app.render('article', results[0],(err,html)=>{
-				if (err) throw err;
-				res.json({result:'OK',data:{id:results[0].postID,url:`images/${results[0].postID}.jpg`},html:html});
-			});
-        }
-    });
+//            console.log(JSON.stringify(results));
+
+            if (results.length == 0) {
+                res.json({result:'FAIL',data:"There's nothing to see."});
+            } else {
+                app.render('article',{'input':results},(err,html)=>{
+                    if (err) throw err;
+                    res.json({result:'OK',html:html});
+                });
+            }
+        });
+    }
 });
 
 function insertTestUserData() {
@@ -270,17 +270,18 @@ function insertTestUserData() {
 function insertTestPostData() {
 	// postType, userID, privacyLevel, description
 	var posts = [
-		['imge',1,0,"Look at dis cool image!"],
-		['imge',1,0,"Fleek on point yo"],
-		['imge',1,0,"Help"],
-		['imge',1,0,"'And how can man die better, than facing fearful odds, for the ashes of his fathers, and the temples of his gods?'"],
-		['imge',1,0,"XOXOXO Luv u gurls"],
-		['imge',1,0,"Rest in piece XXX"],
-		['imge',1,0,"Zac the cat is life"],
-		['imge',1,0,"Le kek™"]
+		['imge',1,0,"Look at dis cool image!",'23539a2d-6ec1-4dc8-8151-248d1adf7b50'],
+		['imge',1,0,"Fleek on point yo",'51f18905-8504-4cfb-8b6e-422079a474a9'],
+		['imge',1,0,"Help",'9874db34-3457-4154-907f-e91e04e240ad'],
+		['imge',1,0,"'And how can man die better, than facing fearful odds, for the ashes of his fathers, and the temples of his gods?'",'a179e55d-8f46-4611-a5f2-331569636802'],
+		['imge',1,0,"XOXOXO Luv u gurls",'eb26258e-61bc-4d7b-b6f2-225fbf9362e2'],
+		['imge',1,0,"Rest in piece XXX",'cc40e073-eab4-406c-99a7-9e99940b54ab'],
+		['imge',1,0,"Zac the cat is life",'e1aad17e-5440-4188-9651-3f4a2fd4536f'],
+		['imge',1,0,"Le kek™",'e4182bc3-e5ea-4d8c-adf6-58b7112b0ee7'],
+        ['imge',1,0,"Zoom zoom",'b5528949-6e8b-4f75-9621-3ea957c37585']
 	];
 	
-	sql.query('INSERT INTO posts (postType,userID,privacyLevel,description) VALUES ?', [posts],(error,results,fields)=>{
+	sql.query('INSERT INTO posts (postType,userID,privacyLevel,description,postUUID) VALUES ?', [posts],(error,results,fields)=>{
 		if (error) {throw error};
 		console.log('Inserted test post data into the database.');
 	});

@@ -2,7 +2,8 @@
 
 // Global constant declarations for general use across program
 const host = "ws://" + window.location.host;
-var preloadImages = [];
+var preloadedImages = [];
+
 
 // As soon as the DOM is ready to manipulate...
 $(document).ready(()=>{
@@ -19,7 +20,7 @@ $(document).ready(()=>{
         $('#header').css({top:'0px'});
 		
 		$('#footer .loading').css({opacity:1});
-		fetchArticle(0,8);
+		fetchArticle(8);
     }
 	
 	$(document).scroll(()=>{
@@ -40,43 +41,62 @@ $(document).ready(()=>{
 //    }
 });
 
-function fetchArticle(count,max,id) {
+function fetchArticle(quantity) {
     const timeline = $('#content div.main');
-    const fromID = timeline.last().attr('postID');
+    var fromID = timeline.last().attr('postID');
+    
+//    if (!fromID) {fromID = null};
+    console.log(JSON.stringify({'fromID':fromID,'quantity':quantity}));
     
     $.ajax({
         url: '/article',
-        data: JSON.stringify({'id':id}),
+        data: JSON.stringify({'fromID':fromID,'quantity':quantity}),
         dataType: 'JSON',
         contentType: "application/json",
         method: 'POST',
         timeout: 5000,
     }).done((response)=>{
-//        console.log(response);
+        console.log(JSON.stringify(response));
         if (response.result == 'OK') {
-//			console.log(response.data.url);
-			preload(response.data.url,()=>{
-				timeline.append(response.html);
-				var newElement = $(`#content div.main .article[postid=${response.data.id}]`);
-				newElement.css({display:'initial'});
-				setTimeout(()=>{
-					newElement.css({opacity:1,top:'0px'});
-				},20);
-			});
-            count++;
-            if (count < max) {setTimeout(()=>{fetchArticle(count,max,response.data.id)},200)};
+            // URL for preload, Append all, sequentially animate them in by ID/order
+            console.log(JSON.stringify($.parseHTML(response.html)));
+            
+            var postUUIDs = $($.parseHTML(response.html)).filter('.article').map((index, value)=>{
+                return $(value).attr('postuuid');
+            });
+            
+            var postURLs = postUUIDs.map((idx,val)=>{
+                return `images/${val}.jpg`;
+            });
+            
+            console.log(postURLs);
+            
+            preload(postURLs,()=>{
+                var iteration = timeline.find('.article').length;
+                console.log('All images loaded, inserting HTML...')
+                timeline.append(response.html);
+                
+                setInterval(()=>{
+                    timeline.find('.article').eq(iteration).css({opacity:1,top:'0px'});
+                    iteration++;
+                },30);
+            });
         } else {
             console.log('The server has rejected the AJAX request.');
         }
     });
 }
 
-function preload(url,callback) {
-	var index = preloadImages.push(new Image()) - 1;
-	preloadImages[index].src = url;
-	preloadImages[index].onload = function() {
-		callback();
-	}
+function preload(urls,callback) {
+    var loaded = 0;
+    for (var i = 0; i < urls.length; i++) {
+        var index = preloadedImages.push(new Image()) - 1;
+        preloadedImages[index].src = urls[i];
+        preloadedImages[index].onload = function() {
+            loaded++;
+            if (loaded == urls.length) {callback()};
+        }
+    }
 }
 
 function footerLoad() {
