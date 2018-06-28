@@ -16,36 +16,26 @@ $(document).ready(()=>{
         }
     });
     
+    // Activates header and footer animations on the index page
     if (window.location.pathname == '/') {
         $('#header').css({top:'0px'});
-		
-		$('#footer .loading').css({opacity:1});
-		fetchArticle(8);
-    }
-	
-	$(document).scroll(()=>{
-		console.log('Scroll event.');
-		if (isScrolledIntoView('#footer')) {
-			console.log('Item scrolled into view.');
-			footerLoad();
-		};
-	})
-	
-//    // Waiting until background image is ready to start slideshow...
-//    if ($(background).prop('complete')) {
-//        initBackground();
-//    } else {
-//        $(background).load(()=>{
-//            initBackground();
-//        });
-//    }
+        
+		fetchArticle(3,()=>{
+            // Checks if the footer is in view, to fetch more articles
+            inView('#footer').on('enter',()=>{
+                console.log('Reached bottom of page, loading more articles...');
+                $('#footer .loading').css({opacity:1});
+                footerLoad();
+                fetchArticle(2);
+            });
+        });
+    } 
 });
 
-function fetchArticle(quantity) {
+function fetchArticle(quantity,callback) {
     const timeline = $('#content div.main');
-    var fromID = timeline.last().attr('postID');
+    var fromID = timeline.find('.article').last().attr('postuuid');
     
-//    if (!fromID) {fromID = null};
     console.log(JSON.stringify({'fromID':fromID,'quantity':quantity}));
     
     $.ajax({
@@ -75,6 +65,7 @@ function fetchArticle(quantity) {
                 var iteration = timeline.find('.article').length;
                 console.log('All images loaded, inserting HTML...')
                 timeline.append(response.html);
+                if (callback) {callback()};
                 
                 setInterval(()=>{
                     timeline.find('.article').eq(iteration).css({opacity:1,top:'0px'});
@@ -83,6 +74,10 @@ function fetchArticle(quantity) {
             });
         } else {
             console.log('The server has rejected the AJAX request.');
+            
+            $('#footer .loading').css({opacity:0});
+            $('#footer .info').text(response.data);
+            $('#footer .info').css({display:'initial',opacity:1});
         }
     });
 }

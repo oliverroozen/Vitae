@@ -64,6 +64,7 @@ body {
 				border: rgba(255,255,255,0.75) solid 2px;
 				text-align: left;
 				.head {
+                    font-style: normal;
 					height: 50px;
 					width:100%;
 					padding: 7px 15px 7px 15px;
@@ -89,6 +90,7 @@ body {
 					width: 100%;
 				}
 				div.conversation {
+                    font-style: italic;
 					padding: 10px;
 					padding-top: 5px;
 					padding-left: 15px;
@@ -132,6 +134,7 @@ body#login {
 body#timeline {
 	overflow-y: scroll;
 	div#footer {
+		text-align: center;
 		height: 100px;
 		bottom: 0px;
 		position: relative;
@@ -140,11 +143,16 @@ body#timeline {
 		display: block;
 		.loading {
 			opacity: 0;
-			transition: opacity 1.5s ease-in-out 2s;
+			transition: opacity 600ms ease-in-out;
 			left: 50%;
 			transform: translateX(-50%);
 			position: absolute;
 		}
+        .info {
+            display: none;
+            opacity: 0;
+			transition: opacity 600ms ease-in-out 600ms;
+        }
 	}
 }
 
