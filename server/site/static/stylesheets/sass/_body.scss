@@ -53,11 +53,12 @@ body {
 				transition: opacity 1s ease-out, top 1s ease-out;
 				font-family: "Gravity";
 				color: white;
-                backdrop-filter: blur(3px);
+//              backdrop-filter: blur(3px);
+				background-color: lighten(mix($dark-lines,$light-lines,50%),7%);
 				max-width: 620px;
 				clear: both;
 				float: right;
-				background-color: rgba(255,255,255,0.075);
+//				background-color: rgba(255,255,255,0.075);
 //				padding:10px;
 				border-radius: 15px;
 				margin-bottom: 40px;
