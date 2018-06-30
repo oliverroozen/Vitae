@@ -142,19 +142,9 @@ app.get('/', function (req, res) {
 	
 	// Query to see if the client has an existing and valid session
     // AND sessionCreation > (NOW()-1) | this seems to be creating an error
-	sql.query('SELECT userID FROM sessions WHERE sessionUUID = ?', [req.session.sessionUUID],(error,results,fields)=>{
-		if (error) throw error;
-		
-		console.log('User data found in database: ' + results);
-		
-		// If no valid session is found, auto-redirect to login page, otherwise serve index
-		if (results.length == 0) {
-			console.log('Requested index, redirecting to login.');
-			res.redirect('login');
-		} else {
-			res.render('index', {randVer: Math.round(Math.random()*1000)});
-			console.log(`index served to ${req.ip} in ${res.getHeader("X-Response-Time")}ms`);
-		}
+	checkExistingAccount(req.session.sessionUUID,true,'login',res,()=>{
+		res.render('index', {randVer: createRandomVersion()});
+		console.log(`index served to ${req.ip} in ${res.getHeader("X-Response-Time")}ms`);
 	});
 });
 
@@ -164,19 +154,9 @@ app.get('/login', function (req, res) {
 	console.log("The session ID for this user is: " + req.session.sessionUUID);
 	
 	// Query to see if the client has an existing and valid session
-	sql.query('SELECT userID FROM sessions WHERE sessionUUID = ?', [req.session.sessionUUID],(error,results,fields)=>{
-		if (error) throw error;
-		
-		console.log('User data found in database: ' + results);
-		
-		// If a valid session is found, auto-redirect to index (timeline), otherwise serve login page
-		if (results.length != 0) {
-			console.log('Requested login, redirecting to index.');
-			res.redirect('/');
-		} else {
-			res.render('login', {randVer: Math.round(Math.random()*1000)});
-			console.log(`login served to ${req.ip} in ${res.getHeader("X-Response-Time")}ms`);
-		}
+	checkExistingAccount(req.session.sessionUUID,false,'',res,()=>{
+		res.render('login', {randVer: createRandomVersion()});
+		console.log(`login served to ${req.ip} in ${res.getHeader("X-Response-Time")}ms`);
 	});
 });
 
@@ -186,7 +166,7 @@ app.get('/user/:username', function (req,res) {
 	sql.query('SELECT username, fullName, accountType, yearLevel, schools.title FROM users JOIN schools ON schools.schoolID = users.schoolID WHERE users.username = ?',[req.params.username],(error,results,fields)=>{
 		if (error) throw error;
 		
-		results[0].randVer = Math.round(Math.random()*1000);
+		results[0].randVer = createRandomVersion();
 		res.render('user',results[0]);
 	});
 })
@@ -250,8 +230,24 @@ app.post('/article', function (req, res) {
     }
 });
 
+function checkExistingAccount(sessionUUID,desire,redirect,res,callback) {
+	sql.query('SELECT userID FROM sessions WHERE sessionUUID = ?', [sessionUUID],(error,results,fields)=>{
+		if (error) throw error;
+		
+		console.log('User data found in database: ' + results);
+		
+		// If no valid session is found, auto-redirect to login page, otherwise serve index
+		if (results.length != desire) {
+			console.log(`Requested index, redirecting to ${redirect}.`);
+			res.redirect(redirect);
+		} else {
+			callback();
+		}
+	});
+}
+
 function createRandomVersion() {
-	return Math.round(Math.random()*1000)
+	return Math.round(Math.random()*1000);
 }
 
 function insertTestUserData() {

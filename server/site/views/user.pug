@@ -1,4 +1,5 @@
-// username, fullName, accountType, yearLevel, schools.title, randVer
+//- username, fullName, accountType, yearLevel, schools.title, randVer
+- var vlogos = 3;
 doctype html
 html(lang='en')
 	head
@@ -9,5 +10,11 @@ html(lang='en')
 			include nav
 		div#content
 			div.entry
-				p Who is #{fullName}?
+				div#title.centered
+					- while(vlogos--) {
+						include ../static/assets/v-logo.svg
+					- }
+				div#cascade
+			div.landing
+				p What am I all about? What are we doing here?
 		div#footer

@@ -159,36 +159,9 @@ function networkImageAnimation(color) {
     });
 }
     
-// Function that automatically positions the background based on the dimensions of the image and the viewport
-function sizeBG() {
-    const windowAspectRatio = $(window).width() / $(window).height();
-    const backgroundAspectRatio = $(background).width() / $(background).height();
-    
-    if (windowAspectRatio < backgroundAspectRatio) {
-        $(background).css({
-            'height':`calc(100vh + ${(($(window).height()/2)/prlxCoef)*2}% + ${blurCoef}px)`,
-            'width':'initial'
-        });
-    } else {
-        $(background).css({
-            'width':`calc(100vw + ${(($(window).width()/2)/prlxCoef)*2}% + ${blurCoef}px)`,
-            'height':'initial'
-        });
-    }
+function generateRandom(min,max) {
+	return Math.round(Math.random() * (max-min)) + min;
 }
-
-// Creates throttled parallax function that fires max 30fps to cut down lag
-var parralax = _.throttle((event) => { // event.pageX, event.pageY
-    var xDiff = event.pageX - $(window).width()/2;
-    var yDiff = event.pageY - $(window).height()/2;
-    
-    $("body#welcome .background img").css({
-        'transform':`translate(${(xDiff/-prlxCoef)-50}%,${(yDiff/-prlxCoef)-50}%)`
-    });
-    $("body#welcome .intro > .wrapper").css({
-        'transform':`translate(${(xDiff/(prlxCoef*8))-50}%,${(yDiff/(prlxCoef*8))-50}%)`
-    });
-},1000/30);
 
 // Function from StackOverflow that resolves length of an object
 Object.size = function(obj) {

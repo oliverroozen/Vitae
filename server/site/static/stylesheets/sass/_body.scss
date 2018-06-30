@@ -130,6 +130,9 @@ body#login {
 		width: 100vw;
 		box-sizing: border-box;
 	}
+	&:-webkit-scrollbar {
+		display: none;
+	}
 }
 
 body#timeline {
@@ -157,12 +160,53 @@ body#timeline {
 	}
 }
 
-body#login::-webkit-scrollbar { 
-    display: none;
-}
-
 body#user {
 	div#content {
-		height: 100vh;
+		div.entry {
+			height: 100vh;
+			width:100vw;
+			position: fixed;
+			top: 0px;
+			left: 0px;
+			div#title {
+				mix-blend-mode: lighten;
+				svg.logo {
+					width: 250px;
+					position: absolute;
+					opacity: 0.0;
+					transition: opacity 8s ease-in-out, transform 8s ease-out;
+					transform: scale(0.7);
+					&:nth-of-type(1) {
+						position: relative;
+						z-index: 5;
+						fill: rgb(0,255,90);
+					}
+					&:nth-of-type(2) {
+						fill: rgb(178,0,116);
+						right: 0px;
+						z-index: 1;
+					}
+					&:nth-of-type(3) {
+						fill: rgb(65,0,254);
+						left: 0px;
+						z-index: 2;
+					}
+				}
+			}
+			div#cascade {
+				color: white;
+				font-family: sans-serif;
+				font-weight: bold;
+				font-size: 1.5em;
+				.cascadeElement {
+					position: absolute;
+				}
+			}
+		}
+		div.landing {
+			position: absolute;
+			top:100vh;
+			background-color: white;
+		}
 	}
 }
