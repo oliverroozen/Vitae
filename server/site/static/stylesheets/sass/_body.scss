@@ -159,3 +159,9 @@ body#timeline {
 body#login::-webkit-scrollbar { 
     display: none;
 }
+
+body#user {
+	div#content {
+		height: 100vh;
+	}
+}

@@ -25,9 +25,9 @@
     "mysql": "^2.15.0",
     "pug": "^2.0.3",
     "response-time": "^2.3.2",
-    "uuid": "^3.2.1",
+    "uuid": "^3.3.2",
     "vary": "^1.1.2",
-    "ws": "^5.2.0"
+    "ws": "^5.2.1"
   },
   "scripts": {
     "start": "node --max-old-space-size=4096 start.js"
@@ -36,6 +36,6 @@
   "analyze": true,
   "license": "MIT",
   "devDependencies": {
-    "sass": "^1.6.1"
+    "sass": "^1.7.3"
   }
 }

@@ -18,7 +18,7 @@ $(document).ready(()=>{
     
     // Activates header and footer animations on the index page
     if (window.location.pathname == '/') {
-        $('#header').css({top:'0px'});
+        $('#nav').css({top:'0px'});
         
 		fetchArticle(3,()=>{
             // Checks if the footer is in view, to fetch more articles

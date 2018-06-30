@@ -9,11 +9,16 @@ const sassRenderOptions = {
 };
 
 console.log('Started...');
+sassRender();
+
 fs.watch(dir+"/sass", (eventType, filename) => {
     console.log(`event type is: ${eventType}`);
-    if (filename) {console.log(`filename change: ${filename}`)};
-    
-    sass.render(sassRenderOptions,function(error, result) {
+    if (filename) {console.log(`filename changed: ${filename}`)};
+    sassRender();
+});
+
+function sassRender() {
+	sass.render(sassRenderOptions,function(error, result) {
         if (error) {console.log(error)} else {
             console.log(result);
             fs.writeFile(dir+'/style.css', result.css, function(err) {
@@ -22,6 +27,4 @@ fs.watch(dir+"/sass", (eventType, filename) => {
             }); 
         }
     });
-});
-
-//sass.render({file: scss_filename}, function(err, result) { /* ... */ });
+}

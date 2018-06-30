@@ -4,18 +4,8 @@ html(lang='en')
 		include head
 	body#timeline
 		div#backgroundicon.centered
-		div#header(style='top:-45px')
-			div.left
-				a.login(onclick='')
-					include ../static/assets/vitae-title.svg
-			div.middle
-				input#search.inputA(name='search', spellcheck='true', autocomplete='on', maxlength='256', placeholder='search', type='text')
-				include ../static/assets/search.svg
-			div.right
-				a.imageButton.notifications(onclick='')
-					include ../static/assets/notification.svg
-				a.imageButton.account(onclick='')
-					img(src='assets/avatar.jpg')
+		div#nav
+			include nav
 		div#content
 			div.main
 		div#footer

@@ -180,6 +180,17 @@ app.get('/login', function (req, res) {
 	});
 });
 
+app.get('/user/:username', function (req,res) {
+    console.log('Requesting user page: ' + req.params.username);
+	
+	sql.query('SELECT username, fullName, accountType, yearLevel, schools.title FROM users JOIN schools ON schools.schoolID = users.schoolID WHERE users.username = ?',[req.params.username],(error,results,fields)=>{
+		if (error) throw error;
+		
+		results[0].randVer = Math.round(Math.random()*1000);
+		res.render('user',results[0]);
+	});
+})
+
 // AJAX async requests the validate page to check user-entered credentials
 app.post('/validate', function (req, res) {
 	console.log('Validate requested...');
@@ -221,7 +232,7 @@ app.post('/article', function (req, res) {
         res.json({result:'FAIL',data:"The client's request was invalid."});
     } else {
         // Query database to select relevant posts
-        const queryString = `SELECT postID, postUUID, posts.userID, fullName, postTime, description FROM vitae.posts JOIN users ON posts.userID = users.userID WHERE postID < IFNULL((SELECT postID FROM posts WHERE postUUID = ?), (SELECT MAX(postID)) + 1) AND postType = ? ORDER BY postTime DESC, postID DESC LIMIT ?`;
+        const queryString = `SELECT postID, postUUID, posts.userID, fullName, postTime, description FROM posts JOIN users ON posts.userID = users.userID WHERE postID < IFNULL((SELECT postID FROM posts WHERE postUUID = ?), (SELECT MAX(postID)) + 1) AND postType = ? ORDER BY postTime DESC, postID DESC LIMIT ?`;
         sql.query(queryString,[req.body.fromID,'imge',req.body.quantity],(error,results,fields)=>{
             if (error) throw error;
 
@@ -238,6 +249,10 @@ app.post('/article', function (req, res) {
         });
     }
 });
+
+function createRandomVersion() {
+	return Math.round(Math.random()*1000)
+}
 
 function insertTestUserData() {
     var user = {
