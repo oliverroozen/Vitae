@@ -1,11 +1,12 @@
-//- postID, userID, fullName, postTime, description
-div.article(postID=postID)
-	a.head.account
-		div.user
-			img(src='assets/avatar.jpg')
-			p= fullName
-	img.post(src=`images/${postID}.jpg`)
-	div.conversation
-		p= description
-//    div.footer
-//        p= postTime
+//- postID, postUUID, userID, fullName, postTime, description
+each val in input
+    div.article(postUUID=val.postUUID)
+        a.head.account
+            div.user
+                img(src='assets/avatar.jpg')
+                p= val.fullName
+        img.post(src=`images/${val.postUUID}.jpg`)
+        div.conversation
+            p= val.description
+//-     div.footer
+//-         p= postTime
