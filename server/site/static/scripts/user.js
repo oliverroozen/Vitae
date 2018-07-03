@@ -16,7 +16,7 @@ $(document).ready(()=>{
 					clearInterval(vAnimation);
 					
 					// This is where we create a fuckton of elements and lag the page to shit
-					generateElements(500);
+					generateElements(500,0);
 				}
 				count++;
 			},100);
@@ -24,13 +24,17 @@ $(document).ready(()=>{
     } 
 });
 
-function generateElements(quantity) {
+function generateElements(quantity,interval) {
 	var container = $('div#content div#cascade');
 	
-	console.log(generateRandom(20,30));
-	
-	for(var elementCount = 0; elementCount < quantity; elementCount++) {
-		const colours = ['red','green','blue'];
-		container.append(`<div class="cascadeElement" style="color:${colours[generateRandom(0,2)]};top:${generateRandom(0,100)}%;left:${generateRandom(0,200)}%;">V</div>`);
-	}
+	var elementCount = 0;
+	setInterval(()=>{
+		if (elementCount < quantity) {
+			const colours = ['red','green','blue'];
+			container.append(`<div class="cascadeElement" style="color:${colours[generateRandom(0,2)]};top:${generateRandom(0,100)}%;left:${generateRandom(0,200)}%;">V</div>`);
+		} else {
+			clearInterval(this);
+		}
+		elementCount++;
+	},interval);
 }

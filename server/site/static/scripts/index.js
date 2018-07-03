@@ -68,7 +68,11 @@ function fetchArticle(quantity,callback) {
                 if (callback) {callback()};
                 
                 setInterval(()=>{
-                    timeline.find('.article').eq(iteration).css({opacity:1,top:'0px'});
+					if (iteration < timeline.find('.article').length) {
+						timeline.find('.article').eq(iteration).css({opacity:1,top:'0px'});
+					} else {
+						clearInterval(this);
+					}
                     iteration++;
                 },30);
             });
