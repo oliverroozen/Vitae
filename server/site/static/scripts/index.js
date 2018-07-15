@@ -18,11 +18,14 @@ $(document).ready(()=>{
     
     // Activates header and footer animations on the index page
     if (window.location.pathname == '/') {
+		// Animate footer entry
         $('#nav').css({top:'0px'});
         
+		// Call to function that fetches individual posts
 		fetchArticle(3,()=>{
             // Checks if the footer is in view, to fetch more articles
             inView('#footer').on('enter',()=>{
+				// When footer in view, load X more articles...
                 console.log('Reached bottom of page, loading more articles...');
                 $('#footer .loading').css({opacity:1});
                 footerLoad();
@@ -32,12 +35,15 @@ $(document).ready(()=>{
     } 
 });
 
+// Function that makes AJAX call to server to fetch X number of posts
 function fetchArticle(quantity,callback) {
+	// Feth variables from DOM
     const timeline = $('#content div.main');
     var fromID = timeline.find('.article').last().attr('postuuid');
     
     console.log(JSON.stringify({'fromID':fromID,'quantity':quantity}));
     
+	// AJAX call to server
     $.ajax({
         url: '/article',
         data: JSON.stringify({'fromID':fromID,'quantity':quantity}),
@@ -47,26 +53,38 @@ function fetchArticle(quantity,callback) {
         timeout: 5000,
     }).done((response)=>{
         console.log(JSON.stringify(response));
+		
+		// Check if server responded correctly, else display error
         if (response.result == 'OK') {
             // URL for preload, Append all, sequentially animate them in by ID/order
             console.log(JSON.stringify($.parseHTML(response.html)));
             
+			// Concatenate the postUUIDs from the server's HTML response
             var postUUIDs = $($.parseHTML(response.html)).filter('.article').map((index, value)=>{
                 return $(value).attr('postuuid');
             });
             
+			// Map the post image URLs from the UUIDs
             var postURLs = postUUIDs.map((idx,val)=>{
                 return `images/${val}.jpg`;
             });
             
             console.log(postURLs);
             
+			// Call the preload function to make sure that the articles don't show until all images are downloaded
             preload(postURLs,()=>{
+				// Find the last article in the timeline to iterate from
                 var iteration = timeline.find('.article').length;
+				
+				
                 console.log('All images loaded, inserting HTML...')
+				
+				// Append all the new HTML to the timeline
                 timeline.append(response.html);
+				// The callback traces all the way from the fetchArticle() request, slightly spaghetti I know
                 if (callback) {callback()};
                 
+				// Interval to sequentially entry animate articles
                 setInterval(()=>{
 					if (iteration < timeline.find('.article').length) {
 						timeline.find('.article').eq(iteration).css({opacity:1,top:'0px'});
@@ -79,6 +97,7 @@ function fetchArticle(quantity,callback) {
         } else {
             console.log('The server has rejected the AJAX request.');
             
+			// Clear footer to display a given error message
             $('#footer .loading').css({opacity:0});
             $('#footer .info').text(response.data);
             $('#footer .info').css({display:'initial',opacity:1});
@@ -113,15 +132,16 @@ function isScrolledIntoView(elem) {
 }
 
 function attemptLogin() {
-	// Submit code
+	// Submitted details
 	var submittedUsername = $('#username').val().trim();
 	var submittedPassword = $('#password').val().trim();
 	
 	console.log('Attempting login...');
 	
+	// Validate that username is at least 1 character and password is at least 8, otherwise show error animation
 	if (submittedUsername.length > 0 && submittedPassword.length >= 8) {
+		// Submit details to the server with AJAX
         var dataInput = {"username":submittedUsername,"password":submittedPassword};
-		// Potentially viable details
         $.ajax({
             url: '/validate',
             data: JSON.stringify(dataInput),
@@ -131,6 +151,7 @@ function attemptLogin() {
             timeout: 5000,
         }).done((data)=>{
             console.log(data);
+			// If correct details, animate and redirect. Else, show error animation
 			if (data.result == 'OK') {
 				successfulLogin();
 			} else {

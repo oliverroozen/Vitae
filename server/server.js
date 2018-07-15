@@ -1,6 +1,7 @@
 "use strict";
 console.log('Server initializing...');
 
+// Loading libraries
 const express = require('express');
 const responseTime = require('response-time');
 const mysql = require('mysql');
@@ -10,14 +11,19 @@ const uuidv4 = require('uuid/v4');
 const session = require('express-session');
 const bodyParser = require('body-parser');
 
+// Creating http server
 const app = express();
 const server = http.createServer();
 
+// Set up express sessions
 const sessionParser = session({
   saveUninitialized: false,
   secret: '$eCuRiTy',
   resave: false
 });
+
+// Constant declarations
+const serverPort = 2001;
 
 //const wss = new WebSocket.Server({
 //  verifyClient: (info, done) => {
@@ -30,6 +36,7 @@ const sessionParser = session({
 //  },server
 //});
 
+// Establish connection to MySQL server
 var sql = mysql.createConnection({
     host: 'localhost',
     user: 'root',
@@ -38,20 +45,20 @@ var sql = mysql.createConnection({
     multipleStatements: true
 });
 
-var websocketUsers = {}; // Depreciated
-
+// Bind express to server and set up Pug
 server.on('request', app);
-
 app.set('title', 'Revision Manager');
 app.set('views', 'site/views');
 app.set('view engine', 'pug');
 
+// Establish static directories and middlewares
 app.use(express.static('site/static'));
 app.use(express.static('site/content'));
 app.use(responseTime({digits:0, suffix:false}));
 app.use(bodyParser.json());
 app.use(sessionParser);
 
+// Query MySQL server to establish tables, auto-create if needed
 sql.connect((err)=>{
     if (err) {
         console.log('Error connecting to SQL database: ' + err.stack);
@@ -120,16 +127,17 @@ sql.connect((err)=>{
 			
 			console.log('Connected to database...');
 			
-			// ----------------- Inserting test data ---------------------
+			// If no data is inside tables, insert test data
 			sql.query('SELECT userID FROM users',(error,results,fields)=>{
 				if (error) throw error;
 				if (results.length == 0) {
 					insertTestUserData();
 				}
 			});
-
-			server.listen(2001,()=>{
-				console.log('Online on port 2001!');
+			
+			// Activate server to listen on given port
+			server.listen(serverPort,()=>{
+				console.log(`Online on port ${serverPort}!`);
 			});
 		});
     }
@@ -160,12 +168,15 @@ app.get('/login', function (req, res) {
 	});
 });
 
+// Dynamic address for user pages, sends username to variable
 app.get('/user/:username', function (req,res) {
     console.log('Requesting user page: ' + req.params.username);
 	
+	// Query database to get all relevant user data, send to PUG
 	sql.query('SELECT username, fullName, accountType, yearLevel, schools.title FROM users JOIN schools ON schools.schoolID = users.schoolID WHERE users.username = ?',[req.params.username],(error,results,fields)=>{
 		if (error) throw error;
 		
+		// Set the random version number and render PUG view
 		results[0].randVer = createRandomVersion();
 		res.render('user',results[0]);
 	});
@@ -176,31 +187,34 @@ app.post('/validate', function (req, res) {
 	console.log('Validate requested...');
     console.log("Given details: " + JSON.stringify(req.body));
     
-	// Query to see if the username and password match a user in the database
-    sql.query('SELECT userID FROM users WHERE username = ? AND password = ?', [req.body.username,req.body.password],(error,results,fields)=>{
-        if (error) throw error;
-		
-		console.log("Checked details against database and found: " + JSON.stringify(results));
+	// Testing to supplement the client side code, prevents database errors from invalid lengths
+	if (req.body.username.length > 0 && req.body.username <= 256 && req.body.password >= 8 && req.body.username <= 64) {
+		// Query to see if the username and password match a user in the database
+		sql.query('SELECT userID FROM users WHERE username = ? AND password = ?', [req.body.username,req.body.password],(error,results,fields)=>{
+			if (error) throw error;
 
-		// If no user is found, respond with an invalid details notice. Otherwise, create new session...
-        if (results.length == 0) {
-            // Send response to let client know server handled successfully, but with no returns
-            console.log('Details are invalid.');
-            res.json({result:'FAIL',message:'Details are invalid.'});
-        } else {
-			// Create a new UUID4 for a session
-            var newSessionID = uuidv4();
-			
-			// Insert this new session ID into the sessions database
-            sql.query('INSERT INTO sessions (userID, sessionUUID, sessionCreation) VALUES (?,?,CURRENT_TIMESTAMP())', [results[0].userID,newSessionID],(error,results,fields)=>{
-                if (error) throw error;
-				
-				// Set this UUID to the session variable, and send success response to client
-				req.session.sessionUUID = newSessionID;
-				res.json({result:'OK',message:'Session updated.'});
-            });
-        }
-    });
+			console.log("Checked details against database and found: " + JSON.stringify(results));
+
+			// If no user is found, respond with an invalid details notice. Otherwise, create new session...
+			if (results.length == 0) {
+				// Send response to let client know server handled successfully, but with no returns
+				console.log('Details are invalid.');
+				res.json({result:'FAIL',message:'Details are invalid.'});
+			} else {
+				// Create a new UUID4 for a session
+				var newSessionID = uuidv4();
+
+				// Insert this new session ID into the sessions database
+				sql.query('INSERT INTO sessions (userID, sessionUUID, sessionCreation) VALUES (?,?,CURRENT_TIMESTAMP())', [results[0].userID,newSessionID],(error,results,fields)=>{
+					if (error) throw error;
+
+					// Set this UUID to the session variable, and send success response to client
+					req.session.sessionUUID = newSessionID;
+					res.json({result:'OK',message:'Session updated.'});
+				});
+			}
+		});
+	}
 });
 
 // AJAX async requests an individual article sub-page
@@ -218,6 +232,7 @@ app.post('/article', function (req, res) {
 
 //            console.log(JSON.stringify(results));
 
+			// If no more articles found, display a message. Else, send the articles' HTML
             if (results.length == 0) {
                 res.json({result:'FAIL',data:"There's nothing more to see 😔"});
             } else {
@@ -230,7 +245,9 @@ app.post('/article', function (req, res) {
     }
 });
 
+// Generalized function to check if a user has an existing valid session
 function checkExistingAccount(sessionUUID,desire,redirect,res,callback) {
+	// Query sessions table to check the session ID
 	sql.query('SELECT userID FROM sessions WHERE sessionUUID = ?', [sessionUUID],(error,results,fields)=>{
 		if (error) throw error;
 		
@@ -246,11 +263,14 @@ function checkExistingAccount(sessionUUID,desire,redirect,res,callback) {
 	});
 }
 
+// Generalized function to generate a random number to prevent browser caching
 function createRandomVersion() {
 	return Math.round(Math.random()*1000);
 }
 
+// Dev function to insert data into the database for testing
 function insertTestUserData() {
+	// Values to be inserted
     var user = {
         username: 'roozeno',
         password: 'admin123',
@@ -268,6 +288,7 @@ function insertTestUserData() {
         location: 'Lincoln, Christchurch'
     };
 	
+	// SQL inserting into the database, sequentially because of foreign keys
     sql.query('INSERT INTO schools (nzqaNum,title,location) VALUES (?,?,?)', [school.nzqaNum,school.title,school.location],(error,results,fields)=>{
         if (error) {throw error};
         sql.query('INSERT INTO users (username,password,accountType,schoolID,nzqaNum,fullName,yearLevel,bio) VALUES (?,?,?,?,?,?,?,?)', [user.username,user.password,user.accountType,user.schoolID,user.nzqaNum,user.fullName,user.yearLevel,user.bio],(error,results,fields)=>{
@@ -278,6 +299,7 @@ function insertTestUserData() {
     });
 }
 
+// Another dev function for inserting test data, this is called after the testUserData function
 function insertTestPostData() {
 	// postType, userID, privacyLevel, description
 	var posts = [
