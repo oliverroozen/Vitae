@@ -188,7 +188,7 @@ app.post('/validate', function (req, res) {
     console.log("Given details: " + JSON.stringify(req.body));
     
 	// Testing to supplement the client side code, prevents database errors from invalid lengths
-	if (req.body.username.length > 0 && req.body.username <= 256 && req.body.password >= 8 && req.body.username <= 64) {
+	if (req.body.username.length > 0 && req.body.username.length <= 256 && req.body.password.length >= 8 && req.body.username.length <= 64) {
 		// Query to see if the username and password match a user in the database
 		sql.query('SELECT userID FROM users WHERE username = ? AND password = ?', [req.body.username,req.body.password],(error,results,fields)=>{
 			if (error) throw error;
@@ -214,6 +214,8 @@ app.post('/validate', function (req, res) {
 				});
 			}
 		});
+	} else {
+		res.json({result:'FAIL',message:'Details are invalid.'});
 	}
 });
 
