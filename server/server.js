@@ -228,7 +228,7 @@ app.post('/article', function (req, res) {
         res.json({result:'FAIL',data:"The client's request was invalid."});
     } else {
         // Query database to select relevant posts
-        const queryString = `SELECT postID, postUUID, posts.userID, fullName, postTime, description FROM posts JOIN users ON posts.userID = users.userID WHERE postID < IFNULL((SELECT postID FROM posts WHERE postUUID = ?), (SELECT MAX(postID)) + 1) AND postType = ? ORDER BY postTime DESC, postID DESC LIMIT ?`;
+        const queryString = `SELECT postID, postUUID, posts.userID, username, fullName, postTime, description FROM posts JOIN users ON posts.userID = users.userID WHERE postID < IFNULL((SELECT postID FROM posts WHERE postUUID = ?), (SELECT MAX(postID)) + 1) AND postType = ? ORDER BY postTime DESC, postID DESC LIMIT ?`;
         sql.query(queryString,[req.body.fromID,'imge',req.body.quantity],(error,results,fields)=>{
             if (error) throw error;
 

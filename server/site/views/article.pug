@@ -1,7 +1,7 @@
-//- postID, postUUID, userID, fullName, postTime, description
+//- postID, postUUID, userID, username, fullName, postTime, description
 each val in input
     div.article(postUUID=val.postUUID)
-        a.head.account
+        a.head.account(href=`user/${val.username}`)
             div.user
                 img(src='assets/avatar.jpg')
                 p= val.fullName
