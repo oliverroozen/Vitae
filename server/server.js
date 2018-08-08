@@ -150,8 +150,8 @@ app.get('/', function (req, res) {
 	
 	// Query to see if the client has an existing and valid session
     // AND sessionCreation > (NOW()-1) | this seems to be creating an error
-	checkExistingAccount(req.session.sessionUUID,true,'login',res,()=>{
-		res.render('index', {randVer: createRandomVersion()});
+	checkExistingAccount(req.session.sessionUUID,true,'login',res,(userData)=>{
+		res.render('index', {randVer: createRandomVersion(),userData:userData});
 		console.log(`index served to ${req.ip} in ${res.getHeader("X-Response-Time")}ms`);
 	});
 });
@@ -172,13 +172,10 @@ app.get('/login', function (req, res) {
 app.get('/user/:username', function (req,res) {
     console.log('Requesting user page: ' + req.params.username);
 	
-	// Query database to get all relevant user data, send to PUG
-	sql.query('SELECT username, fullName, accountType, yearLevel, schools.title FROM users JOIN schools ON schools.schoolID = users.schoolID WHERE users.username = ?',[req.params.username],(error,results,fields)=>{
-		if (error) throw error;
-		
-		// Set the random version number and render PUG view
-		results[0].randVer = createRandomVersion();
-		res.render('user',results[0]);
+	// Query to see if the client has an existing and valid session
+	checkExistingAccount(req.session.sessionUUID,true,'../login',res,(userData)=>{
+		res.render('user', {randVer: createRandomVersion(),userData:userData});
+		console.log(`user page served to ${req.ip} in ${res.getHeader("X-Response-Time")}ms`);
 	});
 })
 
@@ -250,17 +247,17 @@ app.post('/article', function (req, res) {
 // Generalized function to check if a user has an existing valid session
 function checkExistingAccount(sessionUUID,desire,redirect,res,callback) {
 	// Query sessions table to check the session ID
-	sql.query('SELECT userID FROM sessions WHERE sessionUUID = ?', [sessionUUID],(error,results,fields)=>{
+	sql.query('SELECT sessions.userID, username, fullName, accountType, yearLevel, schools.title AS schoolTitle FROM sessions JOIN users ON sessions.userID = users.userID JOIN schools ON schools.schoolID = users.schoolID WHERE sessionUUID = ?', [sessionUUID],(error,results,fields)=>{
 		if (error) throw error;
 		
-		console.log('User data found in database: ' + results);
+		console.log('User data found in database: ' + results[0]);
 		
 		// If no valid session is found, auto-redirect to login page, otherwise serve index
 		if (results.length != desire) {
 			console.log(`Requested index, redirecting to ${redirect}.`);
 			res.redirect(redirect);
 		} else {
-			callback();
+			callback(results[0]);
 		}
 	});
 }

@@ -5,7 +5,9 @@ div.middle
     input#search.inputA(name='search', spellcheck='true', autocomplete='on', maxlength='256', placeholder='search', type='text')
     include ../static/assets/search.svg
 div.right
-    a.imageButton.notifications(onclick='')
+    a.imageButton.tab.create(onclick='')
+        include ../static/assets/add.svg
+    a.imageButton.tab.notifications(onclick='')
         include ../static/assets/notification.svg
-    a.imageButton.account(onclick='')
+    a.imageButton.account(href=`user/${userData.username}`)
         img(src='/assets/avatar.jpg')
