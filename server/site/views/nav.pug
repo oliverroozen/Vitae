@@ -1,13 +1,16 @@
 div.left
-    a.login(href='/')
-        include ../static/assets/vitae-title.svg
+	a.login(href='/')
+	include ../static/assets/vitae-title.svg
 div.middle
-    input#search.inputA(name='search', spellcheck='true', autocomplete='on', maxlength='256', placeholder='search', type='text')
-    include ../static/assets/search.svg
+	input#search.inputA(name='search', spellcheck='true', autocomplete='on', maxlength='256', placeholder='search', type='text')
+	include ../static/assets/search.svg
 div.right
-    a.imageButton.tab.create(onclick='')
-        include ../static/assets/add.svg
-    a.imageButton.tab.notifications(onclick='')
-        include ../static/assets/notification.svg
-    a.imageButton.account(href=`user/${userData.username}`)
-        img(src='/assets/avatar.jpg')
+	a.imageButton.tab.create(onclick='')
+		include ../static/assets/add.svg
+		div.highlight.centered
+	a.imageButton.tab.notifications(onclick='')
+		include ../static/assets/notification.svg
+		div.highlight.centered
+	a.imageButton.tab.account(href=`user/${userData.username}`)
+		img(src='/assets/avatar.jpg')
+		div.highlight.centered
