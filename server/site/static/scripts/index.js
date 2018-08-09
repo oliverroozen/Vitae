@@ -18,7 +18,7 @@ $(document).ready(()=>{
     
     // Activates header and footer animations on the index page
     if (window.location.pathname == '/') {
-		// Animate footer entry
+		// Animate navigation entry
         $('#nav').css({top:'0px'});
         
 		// Call to function that fetches individual posts
@@ -32,7 +32,9 @@ $(document).ready(()=>{
                 fetchArticle(2);
             });
         });
-    } 
+    } else {
+		$('#nav').css({top:'0px'});
+	}
 });
 
 // Function that makes AJAX call to server to fetch X number of posts

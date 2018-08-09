@@ -8,6 +8,7 @@ div#nav {
     svg, img {
         height: 100%;
         fill: white;
+		transition: fill 180ms ease-in;
     }
     div {
         > a {
@@ -71,6 +72,9 @@ div#nav {
         float: none;
         display: inline-block;
         height: inherit;
+		.login:hover svg {
+			fill: $motif-colour;
+		}
     }
     .middle {
         position: absolute;

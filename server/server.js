@@ -177,7 +177,18 @@ app.get('/user/:username', function (req,res) {
 		res.render('user', {randVer: createRandomVersion(),userData:userData});
 		console.log(`user page served to ${req.ip} in ${res.getHeader("X-Response-Time")}ms`);
 	});
-})
+});
+
+// Page for uploading an article to a user account
+app.get('/upload', function (req,res) {
+    console.log('Requesting upload page: ' + req.params.username);
+	
+	// Query to see if the client has an existing and valid session
+	checkExistingAccount(req.session.sessionUUID,true,'../login',res,(userData)=>{
+		res.render('upload', {randVer: createRandomVersion(),userData:userData});
+		console.log(`upload page served to ${req.ip} in ${res.getHeader("X-Response-Time")}ms`);
+	});
+});
 
 // AJAX async requests the validate page to check user-entered credentials
 app.post('/validate', function (req, res) {
