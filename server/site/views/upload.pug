@@ -2,14 +2,32 @@ doctype html
 html(lang='en')
 	head
 		include head
-		link(href="/path/to/cropper.css" rel="stylesheet")
-		script(src="/path/to/cropper.js", type='text/javascript')
-	body#timeline
+		script(src=`/scripts/upload.js?v=${randVer}`, type='text/javascript')
+		link(href="/libraries/cropper.min.css" rel="stylesheet")
+		script(src="/libraries/cropper.min.js", type='text/javascript')
+	body#upload
 		div#backgroundicon.centered
 		div#nav
 			include nav
 		div#content
 			div.main
-				
+				div.header
+					h1 Share a new 
+					select#uploadType
+						option(value='null' default)
+						option(value='image') Image
+						option(value='video' disabled) Video
+						option(value='story' disabled) Story
+						option(value='program' disabled) Program
+					h1 .
+				div.imageUpload
+					div.header
+						input#fileSelect(type='file')
+					div.body
+						include ../static/assets/photo.svg
+						img#display()
+					div.options
+						input(type='text' name='Description' placeholder='description')
+				div.submit
+						a(onclick='submitImage') It's ready.
 		div#footer
-			

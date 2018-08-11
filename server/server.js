@@ -183,6 +183,8 @@ app.get('/user/:username', function (req,res) {
 app.get('/upload', function (req,res) {
     console.log('Requesting upload page: ' + req.params.username);
 	
+	console.log("Directory: " + __dirname);
+	
 	// Query to see if the client has an existing and valid session
 	checkExistingAccount(req.session.sessionUUID,true,'../login',res,(userData)=>{
 		res.render('upload', {randVer: createRandomVersion(),userData:userData});

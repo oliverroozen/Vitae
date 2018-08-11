@@ -210,3 +210,81 @@ body#user {
 		}
 	}
 }
+body#upload {
+	div.main {
+		div.imageUpload {
+			color: white;
+			clear: both;
+			display: block;
+			background-color: $light-lines;
+			border-radius: 15px;
+			border: solid 2px rgba(255,255,255,0.75);
+			div.header {
+				margin: 0px 5px 0px 5px;
+				border-bottom: solid 1px rgba(255,255,255,0.75);
+				display: block;
+				padding: 7px;
+			}
+			div.body {
+				display: block;
+				padding: 18px;
+				svg {
+					max-width: 180px;
+					fill: $dark-lines;
+				}
+				img {
+					max-width: 100%;
+				}
+			}
+			div.options {
+				display: block;
+				margin: 0px 5px 0px 5px;
+				border-top: solid 1px rgba(255,255,255,0.75);
+				padding: 5px;
+				input {
+					display: block;
+					margin:7px;
+					padding:5px;
+					padding-left: 10px;
+					border-radius: 100vh;
+				}
+			}
+		}
+		> div.header {
+			margin-bottom: 20px;
+			* {
+				float: left;
+			}
+			h1 {
+				color: white;
+				font-family: 'Futura';
+				font-weight: bolder;
+			}
+			select {
+				background-color: white;
+				color: black;
+				font-family: 'Futura';
+				font-weight: bolder;
+				font-size: 2em;
+				border: none;
+				border-radius: 2px;
+				margin: 0px 2px 0px 12px;
+				-webkit-appearance: none; 
+				-moz-appearance: none;
+				appearance: none;
+			}
+		}
+		> div.submit {
+			margin-top: 20px;
+			a {
+				font-family: 'Futura';
+				font-weight: bolder;
+				font-size: 1.5em;
+				color: rgb(75,75,75);
+				&:hover {
+					color: $motif-colour;
+				}
+			}
+		}
+	}
+}
