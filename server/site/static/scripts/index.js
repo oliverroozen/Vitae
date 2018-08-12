@@ -185,7 +185,13 @@ function networkImageAnimation(color) {
         },1000,mina.easeout());
     });
 }
-    
+
+function setSelectWidth() {
+   var sel = $('#sel');
+   $('#templateOption').text( sel.val() );
+   sel.width( $('#template').width() * 1.03 );
+}
+
 function generateRandom(min,max) {
 	return Math.round(Math.random() * (max-min)) + min;
 }

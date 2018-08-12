@@ -2,7 +2,6 @@ div#nav {
     top: -45px;
 	display: block;
     height: 48px;
-    background-color: $light-panel;
     position: relative;
     transition: top 1.5s ease-out;
     svg, img {
@@ -21,12 +20,15 @@ div#nav {
         > input {
             height: inherit;
             box-sizing: border-box;
-            border-radius: 5px 5px 20px 20px;
             background-color: $dark-lines;
-            border-color: $light-lines;
             border-width: 4px;
 			color: white;
 			font-size: 0.95em;
+			border: solid 30px transparent;
+			border-left-color: $light-panel;
+			border-right-color: $light-panel;
+			border-radius: 0px;
+			border-top-width: 0px;
         }
         > a.tab {
 			position: relative;
@@ -68,7 +70,15 @@ div#nav {
 		}
         height:100%;
     }
+	.left, .right {
+		background-color: $light-panel;
+		display: block;
+		border: solid 0px transparent;
+		border-bottom-width: 30px;
+	}
     .left {
+		border-right-width: 30px;
+		border-right-color: $light-panel;
         float: none;
         display: inline-block;
         height: inherit;
@@ -87,6 +97,8 @@ div#nav {
 		}
     }
     .right {
+		border-left-width: 30px;
+		border-left-color: $light-panel;
         float: right;
         height: inherit;
     }
