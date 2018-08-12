@@ -281,16 +281,28 @@ function createRandomVersion() {
 // Dev function to insert data into the database for testing
 function insertTestUserData() {
 	// Values to be inserted
-    var user = {
-        username: 'roozeno',
-        password: 'admin123',
-        accountType: 'stdt',
-        schoolID: 1,
-        nzqaNum: 126555266,
-        fullName: 'Ollie Roozen',
-        yearLevel: 13,
-        bio: 'Hello, world.'
-    };
+    var users = [
+		{
+			username: 'roozeno',
+			password: 'admin123',
+			accountType: 'stdt',
+			schoolID: 1,
+			nzqaNum: 126555266,
+			fullName: 'Ollie Roozen',
+			yearLevel: 13,
+			bio: 'Hello, world.'
+		},
+		{
+			username: 'freundz',
+			password: 'admin123',
+			accountType: 'stdt',
+			schoolID: 1,
+			nzqaNum: 132423194,
+			fullName: 'Zac Freund',
+			yearLevel: 13,
+			bio: '( ͡° ͜ʖ ͡°)'
+		}
+	];
 	
     var school = {
         nzqaNum: 347,
