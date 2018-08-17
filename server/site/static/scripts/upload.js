@@ -2,7 +2,9 @@
 
 $(document).ready(()=>{
 	$('select#uploadType').on('change',(event)=>{
-		$(`div#content div.main div.${event.target.value}upload`).css({opacity:1,top:'0px'});
+//		$(`a#submitImage`).css({opacity:0});
+		$(`div#content div.main div.uploadBox`).css({opacity:0,top:'40px'});
+		$(`div#content div.main div.${event.target.value}Upload`).css({opacity:1,top:'0px'});
 	});
 	
 	$('input#fileSelect').on('change',(event)=>{

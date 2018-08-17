@@ -24,7 +24,7 @@ body {
 			input {
 				margin: 6px;
 				width:20vw;
-				backdrop-filter: blur(5px);
+//				backdrop-filter: blur(5px);
 			}
 			input#username {
 				float:left;
@@ -36,7 +36,6 @@ body {
 			a.login {
 				display: inline-block;
 				color: rgb(150,160,160);
-				backdrop-filter: blur(5px);
 			}
 		}	
 	}
@@ -212,6 +211,12 @@ body#user {
 }
 body#upload {
 	div.main {
+		div.uploadBox {
+			transition: opacity 1s ease-out, top 1s ease-out;
+			position: relative;
+			opacity: 0;
+			top: 40px;
+		}
 		div.imageUpload {
 			color: white;
 			clear: both;
@@ -224,6 +229,9 @@ body#upload {
 				border-bottom: solid 1px rgba(255,255,255,0.75);
 				display: block;
 				padding: 7px;
+				input.chooseFile {
+					
+				}
 			}
 			div.body {
 				display: block;
@@ -241,12 +249,11 @@ body#upload {
 				margin: 0px 5px 0px 5px;
 				border-top: solid 1px rgba(255,255,255,0.75);
 				padding: 5px;
-				input {
-					display: block;
-					margin:7px;
-					padding:5px;
-					padding-left: 10px;
-					border-radius: 100vh;
+				div#description {
+					min-width: 33%;
+					max-width: 100%;
+					font-family: 'Gravity';
+					font-size: 0.8em;
 				}
 			}
 		}

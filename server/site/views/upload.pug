@@ -20,14 +20,14 @@ html(lang='en')
 						option(value='story' disabled) Story
 						option(value='program' disabled) Program
 					h1 .
-				div.imageUpload
+				div.uploadBox.chooseFile
 					div.header
 						input#fileSelect(type='file')
 					div.body
 						include ../static/assets/photo.svg
 						img#display()
 					div.options
-						input(type='text' name='Description' placeholder='description')
+						div.inputA#description(contenteditable=true)
 				div.submit
-						a(onclick='submitImage') It's ready.
+						a#submitImage It's ready.
 		div#footer
