@@ -162,7 +162,7 @@ app.get('/login', function (req, res) {
 	console.log("The session ID for this user is: " + req.session.sessionUUID);
 	
 	// Query to see if the client has an existing and valid session
-	checkExistingAccount(req.session.sessionUUID,false,'',res,()=>{
+	checkExistingAccount(req.session.sessionUUID,false,'/',res,()=>{
 		res.render('login', {randVer: createRandomVersion()});
 		console.log(`login served to ${req.ip} in ${res.getHeader("X-Response-Time")}ms`);
 	});
